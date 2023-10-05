@@ -5,6 +5,9 @@ const bodyParser = require('body-parser');
 const nconf = require('nconf');
 const { join } = require('path');
 const { existsSync, writeFileSync, readFileSync } = require('fs');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+const timezone = require('dayjs/plugin/timezone');
 
 require('dotenv').config();
 
@@ -14,11 +17,15 @@ if (!existsSync(settingsFile)) writeFileSync(settingsFile, '{}');
 nconf.use('file', { file: './settings.json' });
 nconf.load();
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault('America/Pacific');
+
 let REFRESH_TOKEN = nconf.get('refresh_token');
 
 const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',') : ['primary'];
 
-const PORT = process.env.PORT || 8501;
+const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
 const clientUrl = `http://localhost:${5173}`;
 
 const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
@@ -63,7 +70,7 @@ app.use(cors());
 app.use(express.json());
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Example app listening on port ${PORT}`);
+  console.log(`Server listening on port ${PORT}`);
 });
 
 app.use('/', express.static('dist'));
@@ -79,23 +86,26 @@ app.get('/calendars', async (req, res) => {
 });
 
 app.get('/events', async (req, res) => {
-  const today = new Date();
-  const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
-  const weekEnd = new Date(weekStart.getTime() + 1000 * 60 * 60 * 24 * 7);
+  const today = dayjs().startOf('day');
+  const tomorrow = today.add(1, 'day').endOf('day');
 
   const allData = [];
 
-  for (const calendarId of CALENDARS) {
-    const { data, status } = await google.calendar({ version: 'v3', auth: oauth2Client }).events.list({
-      calendarId,
-      timeMin: weekStart.toISOString(),
-      timeMax: weekEnd.toISOString(),
-      singleEvents: true,
-      orderBy: 'startTime',
-      maxResults: 2500,
-    });
+  try {
+    for (const calendarId of CALENDARS) {
+      const { data, status } = await google.calendar({ version: 'v3', auth: oauth2Client }).events.list({
+        calendarId,
+        timeMin: today.toISOString(),
+        timeMax: tomorrow.toISOString(),
+        singleEvents: true,
+        orderBy: 'startTime',
+        maxResults: 2500,
+      });
 
-    if (status === 200) allData.push(...data.items);
+      if (status === 200) allData.push(...(data.items || []));
+    }
+  } catch (err) {
+    res.sendStatus(500);
   }
 
   res.send(allData);
@@ -104,13 +114,13 @@ app.get('/events', async (req, res) => {
 app.get('/oauth', async (req, res) => {
   // If the callback passed a code
   if (req.query.code) {
-    const { tokens } = await oauth2Client.getToken(req.query.code);
+    const { tokens } = await oauth2Client.getToken(req.query.code.toString());
     oauth2Client.setCredentials(tokens);
 
     REFRESH_TOKEN = tokens.refresh_token;
 
     nconf.set('refresh_token', tokens.refresh_token);
-    nconf.save();
+    nconf.save((err) => console.error(err));
 
     res.redirect(clientUrl);
   } else if (req.query.logout) {
@@ -118,7 +128,7 @@ app.get('/oauth', async (req, res) => {
     oauth2Client.setCredentials({});
 
     nconf.set('refresh_token', undefined);
-    nconf.save();
+    nconf.save((err) => console.error(err));
 
     res.redirect(clientUrl);
   } else {
