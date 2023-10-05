@@ -1,5 +1,4 @@
 /// <reference types="vite/client" />
-
 import { calendar_v3 } from 'googleapis';
 
 interface ImportMetaEnv {

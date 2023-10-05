@@ -1,6 +1,7 @@
-import React from 'react';
-import { GoogleEvent } from './types';
 import dayjs from 'dayjs';
+import React from 'react';
+
+import { GoogleEvent } from './types';
 
 interface EventCardProps {
   event: GoogleEvent;
@@ -21,7 +22,9 @@ export function EventCard({ event }: EventCardProps) {
 
       <div style={{ marginTop: '0.25rem' }}>
         {event.start?.dateTime &&
-          `${new Date(event.start.dateTime).toLocaleTimeString()} - ${new Date(event.end?.dateTime!).toLocaleTimeString()}`}
+          `${new Date(event.start.dateTime).toLocaleTimeString()} - ${new Date(
+            event.end?.dateTime!
+          ).toLocaleTimeString()}`}
         {event.start?.date && 'All day'}
       </div>
     </div>

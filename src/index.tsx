@@ -1,12 +1,12 @@
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App';
-
 import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
 import isBetween from 'dayjs/plugin/isBetween';
 import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
+import timezone from 'dayjs/plugin/timezone';
+import utc from 'dayjs/plugin/utc';
+import React from 'react';
+import { createRoot } from 'react-dom/client';
+
+import App from './App';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

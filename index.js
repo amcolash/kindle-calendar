@@ -57,7 +57,9 @@ if (REFRESH_TOKEN) {
     refresh_token: REFRESH_TOKEN,
   });
 } else {
-  console.error(`No refresh token found, you must authenticate at http://localhost:${PORT}/oauth before using calendar endpoints`);
+  console.error(
+    `No refresh token found, you must authenticate at http://localhost:${PORT}/oauth before using calendar endpoints`
+  );
 }
 
 if (!CLIENT_ID) console.error('Missing env var: CLIENT_ID');
