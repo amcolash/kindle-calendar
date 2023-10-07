@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import 'weather-icons/css/weather-icons.min.css';
 
+import { getIcon } from './icons';
+import { Weather } from './types';
 import { SERVER } from './util';
 
-interface WeatherProps {}
-
-export function Weather(props: WeatherProps) {
-  const [weather, setWeather] = useState();
+export function Weather() {
+  const [weather, setWeather] = useState<Weather>();
 
   useEffect(() => {
     fetch(`${SERVER}/weather`)
@@ -13,7 +14,12 @@ export function Weather(props: WeatherProps) {
       .then((res) => setWeather(res));
   }, []);
 
-  console.log(weather);
+  if (!weather) return null;
 
-  return <div></div>;
+  return (
+    <div style={{display: 'flex', alignItems: 'baseline', gap: '0.5rem'}}>
+      <i className={getIcon(weather.weather[0])} />
+      {weather.main.feels_like.toFixed(0)}°F
+    </div>
+  );
 }

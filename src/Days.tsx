@@ -18,14 +18,23 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
   });
 
   // Sort days by date, and sort events within each day
-  const dayList = Object.entries(days)
-    .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
-    .map((e) => {
-      return {
-        day: e[0],
-        dayEvents: e[1].sort(sortEvents),
-      };
-    });
+  const dayList = Object.entries(days).map((e) => {
+    return {
+      day: e[0],
+      dayEvents: e[1].sort(sortEvents),
+    };
+  });
+
+  // Ensure that today and tomorrow are always in the list
+  const tomorrow = now.add(1, 'day');
+
+  const nowKey = now.format('MM/DD/YYYY');
+  const tomorrowKey = tomorrow.format('MM/DD/YYYY');
+
+  if (!dayList.find((d) => d.day === nowKey)) dayList.push({ day: nowKey, dayEvents: [] });
+  if (!dayList.find((d) => d.day === tomorrowKey)) dayList.push({ day: tomorrowKey, dayEvents: [] });
+
+  dayList.sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime());
 
   return dayList;
 }
@@ -38,16 +47,7 @@ export function Days({ events }: DaysProps) {
   const [time, setTime] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
 
   const now = dayjs(time);
-  const tomorrow = now.add(1, 'day');
-
   const dayList = parseEvents(events, now);
-
-  // Ensure that today and tomorrow are always in the list
-  const nowKey = now.format('MM/DD/YYYY');
-  const tomorrowKey = tomorrow.format('MM/DD/YYYY');
-
-  if (!dayList.find((d) => d.day === nowKey)) dayList.push({ day: nowKey, dayEvents: [] });
-  if (!dayList.find((d) => d.day === tomorrowKey)) dayList.push({ day: tomorrowKey, dayEvents: [] });
 
   return (
     <div style={{ display: 'grid', gap: '2rem' }}>
@@ -64,9 +64,9 @@ export function Days({ events }: DaysProps) {
           }}
           key={day}
         >
-          <div style={{ fontWeight: 'bolder' }}>{dayjs(day).format('dddd, MMM D')}</div>
+          <div style={{ fontSize: '1.3em' }}>{dayjs(day).format('dddd, MMM D')}</div>
 
-          {dayEvents.length === 0 && <div>No events</div>}
+          {dayEvents.length === 0 && <div style={{ color: 'grey' }}>No events</div>}
 
           {dayEvents.map((event) => (
             <EventCard key={event.id} event={event} now={now} />

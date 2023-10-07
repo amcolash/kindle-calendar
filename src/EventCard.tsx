@@ -13,14 +13,15 @@ export function EventCard({ event, now }: EventCardProps) {
   const end = dayjs(event.end?.dateTime || event.end?.date);
 
   const allDay = event.start?.date && event.end?.date;
+  const current = (now || dayjs()).isBetween(start, end, null, '[]');
 
   return (
     <div
       style={{
         padding: '0.5rem',
-        border: '1px solid #777',
+        outline: current ? '3px solid grey' : undefined,
         borderRadius: '0.3rem',
-        background: (now || dayjs()).isBetween(start, end, null, '[]') ? 'red' : undefined,
+        // background: current ? 'red' : undefined,
       }}
       key={event.id}
     >

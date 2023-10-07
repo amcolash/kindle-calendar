@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { Days } from './Days';
+import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';
 import { GoogleEvent } from './types';
@@ -44,7 +45,7 @@ export default function App() {
   }, [googleLoggedIn]);
 
   return (
-    <div style={{ margin: '1rem', display: 'grid', gap: '2rem' }}>
+    <div style={{ padding: '2rem', display: 'grid', gap: '3rem' }}>
       {googleLoggedIn === false && (
         <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} style={{ width: '12rem' }} />
       )}
@@ -70,15 +71,31 @@ export default function App() {
           position: 'absolute',
           bottom: 0,
           left: 0,
-          display: 'flex',
-          justifyContent: 'space-between',
-          padding: '1rem',
+          padding: '1.5rem',
           width: '100%',
           boxSizing: 'border-box',
+          boxShadow: '0 0 1rem rgba(0, 0, 0, 0.2), 0 -5rem 3rem rgba(255, 255, 255, 1)',
+          background: 'white',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
         }}
       >
-        {spotifyLoggedIn === true && <NowPlaying />}
-        <Weather />
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          {spotifyLoggedIn === true && <NowPlaying />}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+            }}
+          >
+            <Weather />
+          </div>
+        </div>
+
+        <UpcomingEvent events={events} />
       </div>
     </div>
   );

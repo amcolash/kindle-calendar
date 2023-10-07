@@ -23,9 +23,9 @@ export function NowPlaying(props: NowPlayingProps) {
   const track = data.item as Track;
   return (
     <div style={{ display: 'flex', gap: '1rem' }}>
-      <img src={track.album.images[0].url} style={{ width: '5em' }} />
+      <img src={track.album.images[0].url} style={{ width: '5em', border: '1px solid #ccc' }} />
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-        <span style={{ fontSize: '1.2rem' }}>{track.name}</span>
+        <span style={{ fontSize: '1.35em' }}>{track.name}</span>
         <span style={{ color: 'grey' }}>{track.artists.map((a) => a.name).join(', ')}</span>
       </div>
     </div>

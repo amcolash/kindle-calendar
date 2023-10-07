@@ -9,7 +9,7 @@ const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const { SpotifyApi } = require('@spotify/web-api-ts-sdk');
-const fetch = require('node-fetch');
+const { default: fetch } = require('node-fetch');
 
 require('dotenv').config();
 
@@ -105,7 +105,7 @@ app.get('/calendars', async (req, res) => {
 
 app.get('/events', async (req, res) => {
   const today = dayjs().startOf('day');
-  const tomorrow = today.add(1, 'day').endOf('day');
+  const tomorrow = today.add(3, 'day').endOf('day');
 
   const allData = [];
 
