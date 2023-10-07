@@ -8,6 +8,8 @@ const { existsSync, writeFileSync, readFileSync } = require('fs');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
+const { SpotifyApi } = require('@spotify/web-api-ts-sdk');
+const fetch = require('node-fetch');
 
 require('dotenv').config();
 
@@ -21,15 +23,17 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 dayjs.tz.setDefault('America/Pacific');
 
-let REFRESH_TOKEN = nconf.get('refresh_token');
+let GOOGLE_REFRESH_TOKEN = nconf.get('google_refresh_token');
+let SPOTIFY_ACCESS_TOKEN = nconf.get('spotify_access_token');
 
 const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',') : ['primary'];
 
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
 const clientUrl = `http://localhost:${5173}`;
 
-const { CLIENT_ID, CLIENT_SECRET, REDIRECT_URL } = process.env;
-const oauth2Client = new google.auth.OAuth2(CLIENT_ID, CLIENT_SECRET, REDIRECT_URL);
+const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URL, SPOTIFY_CLIENT_ID, OPEN_WEATHER_KEY } = process.env;
+const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URL);
+let spotifySdk;
 
 // HTTPS setup
 const credentials = {};
@@ -52,21 +56,30 @@ app.use(bodyParser.json());
 
 const server = require('https').createServer(credentials, app);
 
-if (REFRESH_TOKEN) {
+if (!GOOGLE_CLIENT_ID) console.error('Missing env var: GOOGLE_CLIENT_ID');
+if (!GOOGLE_CLIENT_SECRET) console.error('Missing env var: GOOGLE_CLIENT_SECRET');
+if (!REDIRECT_URL) console.error('Missing env var: REDIRECT_URL');
+if (!SPOTIFY_CLIENT_ID) console.error('Missing env var: SPOTIFY_CLIENT_ID');
+
+if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !REDIRECT_URL || !SPOTIFY_CLIENT_ID) process.exit(1);
+
+if (GOOGLE_REFRESH_TOKEN) {
   oauth2Client.setCredentials({
-    refresh_token: REFRESH_TOKEN,
+    refresh_token: GOOGLE_REFRESH_TOKEN,
   });
 } else {
   console.error(
-    `No refresh token found, you must authenticate at http://localhost:${PORT}/oauth before using calendar endpoints`
+    `No google refresh token found, you must authenticate at http://localhost:${PORT}/oauth before using calendar endpoints`
   );
 }
 
-if (!CLIENT_ID) console.error('Missing env var: CLIENT_ID');
-if (!CLIENT_SECRET) console.error('Missing env var: CLIENT_SECRET');
-if (!REDIRECT_URL) console.error('Missing env var: REDIRECT_URL');
-
-if (!CLIENT_ID || !CLIENT_SECRET || !REDIRECT_URL) process.exit(1);
+if (SPOTIFY_ACCESS_TOKEN) {
+  makeSpotifySdk(SPOTIFY_ACCESS_TOKEN);
+} else {
+  console.error(
+    `No spotify access token found, you must authenticate at http://localhost:${PORT}/spotify-oauth before using spotify endpoints`
+  );
+}
 
 app.use(cors());
 app.use(express.json());
@@ -78,7 +91,10 @@ server.listen(PORT, '0.0.0.0', () => {
 app.use('/', express.static('dist'));
 
 app.get('/status', (req, res) => {
-  res.send({ loggedIn: REFRESH_TOKEN !== undefined });
+  res.send({
+    google: GOOGLE_REFRESH_TOKEN !== undefined,
+    spotify: SPOTIFY_ACCESS_TOKEN !== undefined,
+  });
 });
 
 app.get('/calendars', async (req, res) => {
@@ -119,18 +135,22 @@ app.get('/oauth', async (req, res) => {
     const { tokens } = await oauth2Client.getToken(req.query.code.toString());
     oauth2Client.setCredentials(tokens);
 
-    REFRESH_TOKEN = tokens.refresh_token;
+    GOOGLE_REFRESH_TOKEN = tokens.refresh_token;
 
-    nconf.set('refresh_token', tokens.refresh_token);
-    nconf.save((err) => console.error(err));
+    nconf.set('google_refresh_token', tokens.refresh_token);
+    nconf.save((err) => {
+      if (err) console.error(err);
+    });
 
     res.redirect(clientUrl);
   } else if (req.query.logout) {
-    REFRESH_TOKEN = undefined;
+    GOOGLE_REFRESH_TOKEN = undefined;
     oauth2Client.setCredentials({});
 
-    nconf.set('refresh_token', undefined);
-    nconf.save((err) => console.error(err));
+    nconf.set('google_refresh_token', undefined);
+    nconf.save((err) => {
+      if (err) console.error(err);
+    });
 
     res.redirect(clientUrl);
   } else {
@@ -145,3 +165,75 @@ app.get('/oauth', async (req, res) => {
     res.redirect(url);
   }
 });
+
+app.post('/spotify-oauth', (req, res) => {
+  makeSpotifySdk(req.body);
+  res.redirect(clientUrl);
+});
+
+app.get('/now-playing', (req, res) => {
+  if (spotifySdk) {
+    spotifySdk.player
+      .getPlaybackState()
+      .then((data) => {
+        // console.log(data);
+        res.send(data);
+
+        spotifySdk.getAccessToken().then((token) => {
+          makeSpotifySdk(token);
+        });
+      })
+      .catch((err) => {
+        console.error(err);
+        res.sendStatus(500);
+
+        if (err.toString().includes('Refresh token revoked')) {
+          makeSpotifySdk(undefined);
+        }
+      });
+
+    return;
+  }
+
+  res.sendStatus(401);
+});
+
+let weatherCache = { lastUpdated: 0, data: {} };
+app.get('/weather', async (req, res) => {
+  const lat = '47.687210';
+  const lon = '-122.338530';
+
+  if (Date.now() - weatherCache.lastUpdated < 1000 * 60 * 5) {
+    res.send(weatherCache.data);
+    return;
+  }
+
+  const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=imperial&appid=${OPEN_WEATHER_KEY}`;
+  fetch(url)
+    .then((r) => r.json())
+    .then((data) => {
+      if (data.cod === 200) {
+        res.send(data);
+        weatherCache = { lastUpdated: Date.now(), data };
+      } else throw data;
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(err.cod || 500).send(err);
+    });
+});
+
+// Functions
+function makeSpotifySdk(token) {
+  if (SPOTIFY_CLIENT_ID) {
+    SPOTIFY_ACCESS_TOKEN = token;
+
+    if (token) spotifySdk = SpotifyApi.withAccessToken(SPOTIFY_CLIENT_ID, SPOTIFY_ACCESS_TOKEN);
+    else spotifySdk = undefined;
+
+    nconf.set('spotify_access_token', SPOTIFY_ACCESS_TOKEN);
+    nconf.save((err) => {
+      if (err) console.error(err);
+    });
+  }
+}

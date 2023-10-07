@@ -35,24 +35,38 @@ interface DaysProps {
 }
 
 export function Days({ events }: DaysProps) {
-  const [time, setTime] = useState(dayjs().format('YYYY-MM-DDThh:mm'));
+  const [time, setTime] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
 
   const now = dayjs(time);
+  const tomorrow = now.add(1, 'day');
+
   const dayList = parseEvents(events, now);
+
+  // Ensure that today and tomorrow are always in the list
+  const nowKey = now.format('MM/DD/YYYY');
+  const tomorrowKey = tomorrow.format('MM/DD/YYYY');
+
+  if (!dayList.find((d) => d.day === nowKey)) dayList.push({ day: nowKey, dayEvents: [] });
+  if (!dayList.find((d) => d.day === tomorrowKey)) dayList.push({ day: tomorrowKey, dayEvents: [] });
 
   return (
     <div style={{ display: 'grid', gap: '2rem' }}>
-      {import.meta.env.DEV && <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />}
+      {/* {import.meta.env.DEV && <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />} */}
 
       {dayList.map(({ day, dayEvents }) => (
         <div
           style={{
             display: 'grid',
             gap: '1rem',
+            padding: '1rem',
+            borderRadius: '1rem',
+            boxShadow: '0 0 1rem rgba(0, 0, 0, 0.1)',
           }}
           key={day}
         >
-          <div>{dayjs(day).format('dddd, MMM D')}</div>
+          <div style={{ fontWeight: 'bolder' }}>{dayjs(day).format('dddd, MMM D')}</div>
+
+          {dayEvents.length === 0 && <div>No events</div>}
 
           {dayEvents.map((event) => (
             <EventCard key={event.id} event={event} now={now} />
