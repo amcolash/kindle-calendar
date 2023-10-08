@@ -20,8 +20,8 @@ export function EventCard({ event, now }: EventCardProps) {
       style={{
         padding: '0.5rem',
         outline: current ? '3px solid grey' : undefined,
+        background: current ? '#ddd' : undefined,
         borderRadius: '0.3rem',
-        // background: current ? 'red' : undefined,
       }}
       key={event.id}
     >

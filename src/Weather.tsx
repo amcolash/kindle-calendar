@@ -22,15 +22,15 @@ export function Weather() {
   if (!weather) return null;
 
   return (
-    <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', justifyItems: 'flex-start', alignItems: 'baseline', gap: '1rem'}}>
+    <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', justifyItems: 'center', alignItems: 'baseline', gap: '1rem'}}>
       <i className={getIcon(weather.weather[0])} />
-      {weather.main.feels_like.toFixed(0)}°F
+      <span style={{justifySelf: 'flex-start'}}>{weather.main.feels_like.toFixed(0)}°F</span>
 
       <i className="wi wi-humidity" />
-      {weather.main.humidity}%
+      <span style={{justifySelf: 'flex-start'}}>{weather.main.humidity}%</span>
 
       <i className="wi wi-smog" />
-      {aqi}
+      <span style={{justifySelf: 'flex-start'}}>{aqi}</span>
     </div>
   );
 }

@@ -15,10 +15,12 @@ const { execSync } = require('child_process');
 
 require('dotenv').config();
 
-const settingsFile = join(__dirname, 'settings.json');
-if (!existsSync(settingsFile)) writeFileSync(settingsFile, '{}');
-
 nconf.use('file', { file: './settings.json' });
+nconf.defaults({
+  google_refresh_token: undefined,
+  spotify_access_token: undefined,
+});
+
 nconf.load();
 
 dayjs.extend(utc);
@@ -257,6 +259,8 @@ app.get('/aqi', (req, res) => {
 });
 
 app.get('/screenshot', async (req, res) => {
+  console.log(new Date().toLocaleString(), 'Taking screenshot');
+
   const browser = await puppeteer.launch({ headless: 'new', ignoreHTTPSErrors: true });
   try {
     const page = await browser.newPage();

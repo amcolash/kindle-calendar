@@ -73,7 +73,11 @@ export function Days({ events, time }: DaysProps) {
         >
           <div style={{ fontSize: '1.3em' }}>{dayjs(day).format('dddd, MMM D')}</div>
 
-          {dayEvents.length === 0 && <div style={{ color: 'grey' }}>No events</div>}
+          {dayEvents.length === 0 && (
+            <div style={{ color: 'grey' }}>
+              {dayjs(day).isSame(now, 'day') ? 'No more events today' : 'No events scheduled'}
+            </div>
+          )}
 
           {dayEvents.map((event) => (
             <EventCard key={event.id} event={event} now={now} />

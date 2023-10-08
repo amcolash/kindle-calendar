@@ -46,31 +46,61 @@ export default function App() {
     }
   }, [googleLoggedIn]);
 
+  if (!googleLoggedIn || !spotifyLoggedIn)
+    return (
+      <div
+        style={{
+          display: 'flex',
+          width: '100vw',
+          height: '100vh',
+          justifyContent: 'center',
+          alignItems: 'center',
+          fontSize: '2rem',
+        }}
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '15rem' }}>
+          {googleLoggedIn === false && <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} />}
+
+          {spotifyLoggedIn === false && (
+            <button
+              onClick={loginSpotify}
+              style={{
+                padding: '1rem 2rem',
+                borderRadius: '2rem',
+                border: 'none',
+                background: '	#1DB954',
+                color: 'white',
+                fontSize: '0.65em',
+              }}
+            >
+              Log in with Spotify
+            </button>
+          )}
+        </div>
+      </div>
+    );
+
   return (
     <div style={{ padding: '2rem', display: 'grid', gap: '3rem' }}>
-      {googleLoggedIn === false && (
-        <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} style={{ width: '12rem' }} />
-      )}
-      {spotifyLoggedIn === false && <button onClick={loginSpotify}>Login to Spotify</button>}
-
-      {googleLoggedIn === true && (
-        <div>
-          {/* {import.meta.env.DEV && (
-            <button
-              onClick={() => (location.href = `${SERVER}/oauth?logout=true`)}
-              style={{ bottom: '1rem', right: '1rem', position: 'absolute' }}
-            >
-              Log out
-            </button>
-          )} */}
-
-          {/* {import.meta.env.DEV && (
-            <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />
-          )} */}
-
-          <Days events={events} time={time} />
+      {import.meta.env.DEV && (
+        <div
+          style={{
+            position: 'fixed',
+            top: '2.25rem',
+            right: '2.25rem',
+            display: 'grid',
+            gap: '0.5rem',
+            padding: '1rem',
+            background: 'white',
+            justifyItems: 'flex-end',
+          }}
+        >
+          <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />
+          <div>{dayjs().format('h:mm A')}</div>
         </div>
       )}
+
+      <Days events={events} time={time} />
 
       <div
         style={{
@@ -89,16 +119,7 @@ export default function App() {
       >
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {spotifyLoggedIn === true && <NowPlaying />}
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'flex-end',
-              justifyContent: 'space-between',
-            }}
-          >
-            <Weather />
-          </div>
+          <Weather />
         </div>
 
         <UpcomingEvent events={events} time={time} />
