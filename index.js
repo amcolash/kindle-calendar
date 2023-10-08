@@ -4,7 +4,7 @@ const { google } = require('googleapis');
 const bodyParser = require('body-parser');
 const nconf = require('nconf');
 const { join } = require('path');
-const { existsSync, writeFileSync, readFileSync } = require('fs');
+const { existsSync, readFileSync } = require('fs');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
@@ -13,15 +13,21 @@ const { default: fetch } = require('node-fetch');
 const puppeteer = require('puppeteer');
 const { execSync } = require('child_process');
 
+const IS_DOCKER = existsSync('/.dockerenv');
+
 require('dotenv').config();
 
-nconf.use('file', { file: './settings.json' });
-nconf.defaults({
-  google_refresh_token: undefined,
-  spotify_access_token: undefined,
-});
+try {
+  nconf.use('file', { file: './settings.json' });
+  nconf.defaults({
+    google_refresh_token: undefined,
+    spotify_access_token: undefined,
+  });
 
-nconf.load();
+  nconf.load();
+} catch (err) {
+  console.error(err);
+}
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -33,7 +39,7 @@ let SPOTIFY_ACCESS_TOKEN = nconf.get('spotify_access_token');
 const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',') : ['primary'];
 
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
-const clientUrl = `http://localhost:${5173}`;
+const clientUrl = IS_DOCKER ? `https://localhost${PORT}` : `http://localhost:${5173}`;
 
 const {
   GOOGLE_CLIENT_ID,
@@ -61,6 +67,9 @@ if (existsSync('./.cert/RSA-fullchain.pem')) {
 } else if (existsSync('./.cert/cert.pem')) {
   credentials.cert = readFileSync('./.cert/cert.pem');
 }
+
+if (!credentials.key) throw 'Missing key for https server';
+if (!credentials.cert) throw 'Missing cert for https server';
 
 // Make the server
 const app = express();
@@ -118,6 +127,7 @@ app.get('/status', (req, res) => {
   res.send({
     google: GOOGLE_REFRESH_TOKEN !== undefined,
     spotify: SPOTIFY_ACCESS_TOKEN !== undefined,
+    docker: IS_DOCKER,
   });
 });
 
@@ -147,7 +157,9 @@ app.get('/events', async (req, res) => {
       if (status === 200) allData.push(...(data.items || []));
     }
   } catch (err) {
+    console.error(err);
     res.sendStatus(500);
+    return;
   }
 
   res.send(allData);
@@ -261,7 +273,12 @@ app.get('/aqi', (req, res) => {
 app.get('/screenshot', async (req, res) => {
   console.log(new Date().toLocaleString(), 'Taking screenshot');
 
-  const browser = await puppeteer.launch({ headless: 'new', ignoreHTTPSErrors: true });
+  const browser = await puppeteer.launch({
+    headless: 'new',
+    ignoreHTTPSErrors: true,
+    executablePath: IS_DOCKER ? '/usr/bin/chromium-browser' : undefined,
+    args: ['--no-sandbox'],
+  });
   try {
     const page = await browser.newPage();
 
@@ -290,7 +307,7 @@ function makeSpotifySdk(token) {
     if (token) spotifySdk = SpotifyApi.withAccessToken(SPOTIFY_CLIENT_ID, SPOTIFY_ACCESS_TOKEN);
     else spotifySdk = undefined;
 
-    nconf.set('spotify_access_token', SPOTIFY_ACCESS_TOKEN);
+    nconf.set('spotify_access_token', token?.expires === -1 ? undefined : token);
     nconf.save((err) => {
       if (err) console.error(err);
     });

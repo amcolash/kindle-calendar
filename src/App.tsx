@@ -1,6 +1,6 @@
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import dayjs from 'dayjs';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { Days } from './Days';
@@ -8,24 +8,33 @@ import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';
 import { GoogleEvent } from './types';
-import { SERVER, SPOTIFY_CLIENT_ID } from './util';
+import { PORT, SERVER, SPOTIFY_CLIENT_ID } from './util';
 
-function loginSpotify() {
-  localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
-
-  SpotifyApi.performUserAuthorization(
-    SPOTIFY_CLIENT_ID,
-    'http://localhost:5173',
-    ['user-read-playback-state'],
-    `${SERVER}/spotify-oauth`
-  );
+interface Status {
+  google?: boolean;
+  spotify?: boolean;
+  docker?: boolean;
 }
 
 export default function App() {
-  const [googleLoggedIn, setGoogleLoggedIn] = useState(false);
-  const [spotifyLoggedIn, setSpotifyLoggedIn] = useState(false);
+  const [status, setStatus] = useState<Status>({
+    google: undefined,
+    spotify: undefined,
+    docker: undefined,
+  });
   const [events, setEvents] = useState<GoogleEvent[]>([]);
   const [time, setTime] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
+
+  const loginSpotify = useCallback(() => {
+    localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
+
+    SpotifyApi.performUserAuthorization(
+      SPOTIFY_CLIENT_ID,
+      status.docker ? SERVER : `http://localhost:${PORT}`,
+      ['user-read-playback-state'],
+      `${SERVER}/spotify-oauth`
+    );
+  }, [SERVER, SPOTIFY_CLIENT_ID, status]);
 
   useEffect(() => {
     if (location.search.includes('code=')) loginSpotify();
@@ -33,20 +42,19 @@ export default function App() {
     fetch(`${SERVER}/status`)
       .then((res) => res.json())
       .then((res) => {
-        setGoogleLoggedIn(res.google);
-        setSpotifyLoggedIn(res.spotify);
+        setStatus({ google: res.google, spotify: res.spotify, docker: res.docker });
       });
   }, []);
 
   useEffect(() => {
-    if (googleLoggedIn) {
+    if (status.google) {
       fetch(`${SERVER}/events`)
         .then((res) => res.json())
         .then((res) => setEvents(res));
     }
-  }, [googleLoggedIn]);
+  }, [status.google]);
 
-  if (!googleLoggedIn || !spotifyLoggedIn)
+  if (!status.google || !status.spotify)
     return (
       <div
         style={{
@@ -59,9 +67,9 @@ export default function App() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '15rem' }}>
-          {googleLoggedIn === false && <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} />}
+          {!status.google && <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} />}
 
-          {spotifyLoggedIn === false && (
+          {!status.spotify && (
             <button
               onClick={loginSpotify}
               style={{
@@ -118,7 +126,7 @@ export default function App() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          {spotifyLoggedIn === true && <NowPlaying />}
+          <NowPlaying />
           <Weather />
         </div>
 
