@@ -25,7 +25,7 @@ export default function App() {
   const [googleLoggedIn, setGoogleLoggedIn] = useState(false);
   const [spotifyLoggedIn, setSpotifyLoggedIn] = useState(false);
   const [events, setEvents] = useState<GoogleEvent[]>([]);
-  const [time, setTime] = useState(dayjs().add(2, 'day').startOf('day').format('YYYY-MM-DDTHH:mm'));
+  const [time, setTime] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
 
   useEffect(() => {
     if (location.search.includes('code=')) loginSpotify();

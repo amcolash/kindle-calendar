@@ -10,6 +10,8 @@ const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const { SpotifyApi } = require('@spotify/web-api-ts-sdk');
 const { default: fetch } = require('node-fetch');
+const puppeteer = require('puppeteer');
+const { execSync } = require('child_process');
 
 require('dotenv').config();
 
@@ -104,7 +106,7 @@ app.get('/calendars', async (req, res) => {
 });
 
 app.get('/events', async (req, res) => {
-  const today = dayjs().startOf('day').add(2, 'day');
+  const today = dayjs().startOf('day');
   const tomorrow = today.add(1, 'day').endOf('day');
 
   const allData = [];
@@ -221,6 +223,28 @@ app.get('/weather', async (req, res) => {
       console.error(err);
       res.status(err.cod || 500).send(err);
     });
+});
+
+app.get('/screenshot', async (req, res) => {
+  const browser = await puppeteer.launch({ headless: 'new', ignoreHTTPSErrors: true });
+  try {
+    const page = await browser.newPage();
+
+    await page.setViewport({ width: 758, height: 1024 });
+    await page.goto(`https://localhost:${PORT}`, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
+
+    const file = join(__dirname, 'screenshot.png');
+    await page.screenshot({ type: 'png', path: file, fullPage: true });
+
+    execSync(`convert ${file} -depth 8 -colorspace gray -define png:color-type=0 -define png:bit-depth=8 ${file}`);
+
+    res.status(200).sendFile(file);
+  } catch (e) {
+    console.log(e);
+    res.status(500).send(e);
+  } finally {
+    await browser.close();
+  }
 });
 
 // Functions
