@@ -1,4 +1,5 @@
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import dayjs from 'dayjs';
 import React, { useEffect, useState } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
@@ -24,6 +25,7 @@ export default function App() {
   const [googleLoggedIn, setGoogleLoggedIn] = useState(false);
   const [spotifyLoggedIn, setSpotifyLoggedIn] = useState(false);
   const [events, setEvents] = useState<GoogleEvent[]>([]);
+  const [time, setTime] = useState(dayjs().add(2, 'day').startOf('day').format('YYYY-MM-DDTHH:mm'));
 
   useEffect(() => {
     if (location.search.includes('code=')) loginSpotify();
@@ -62,7 +64,11 @@ export default function App() {
             </button>
           )} */}
 
-          <Days events={events} />
+          {/* {import.meta.env.DEV && (
+            <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />
+          )} */}
+
+          <Days events={events} time={time} />
         </div>
       )}
 
@@ -95,7 +101,7 @@ export default function App() {
           </div>
         </div>
 
-        <UpcomingEvent events={events} />
+        <UpcomingEvent events={events} time={time} />
       </div>
     </div>
   );

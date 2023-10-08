@@ -11,10 +11,20 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
   events.forEach((event) => {
     const start = dayjs(event.start?.dateTime || event.start?.date);
     const end = dayjs(event.end?.dateTime || event.end?.date);
+    const multiDay = end.diff(start, 'day') > 0;
     const key = start.format('MM/DD/YYYY');
 
     days[key] = days[key] || [];
     if (now.isBefore(end)) days[key].push(event);
+
+    if (multiDay) {
+      const extraDays = end.diff(start, 'day') - 1;
+      for (let i = 1; i <= extraDays; i++) {
+        const key = start.add(i, 'day').format('MM/DD/YYYY');
+        days[key] = days[key] || [];
+        days[key].push(event);
+      }
+    }
   });
 
   // Sort days by date, and sort events within each day
@@ -41,18 +51,15 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
 
 interface DaysProps {
   events: GoogleEvent[];
+  time: string;
 }
 
-export function Days({ events }: DaysProps) {
-  const [time, setTime] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
-
+export function Days({ events, time }: DaysProps) {
   const now = dayjs(time);
   const dayList = parseEvents(events, now);
 
   return (
     <div style={{ display: 'grid', gap: '2rem' }}>
-      {/* {import.meta.env.DEV && <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />} */}
-
       {dayList.map(({ day, dayEvents }) => (
         <div
           style={{

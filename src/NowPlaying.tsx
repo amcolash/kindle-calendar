@@ -3,9 +3,7 @@ import React, { useEffect, useState } from 'react';
 
 import { SERVER } from './util';
 
-interface NowPlayingProps {}
-
-export function NowPlaying(props: NowPlayingProps) {
+export function NowPlaying() {
   const [data, setData] = useState<PlaybackState>();
 
   useEffect(() => {

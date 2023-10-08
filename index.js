@@ -104,8 +104,8 @@ app.get('/calendars', async (req, res) => {
 });
 
 app.get('/events', async (req, res) => {
-  const today = dayjs().startOf('day');
-  const tomorrow = today.add(3, 'day').endOf('day');
+  const today = dayjs().startOf('day').add(2, 'day');
+  const tomorrow = today.add(1, 'day').endOf('day');
 
   const allData = [];
 
