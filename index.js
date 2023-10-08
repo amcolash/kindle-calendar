@@ -33,7 +33,15 @@ const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',')
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
 const clientUrl = `http://localhost:${5173}`;
 
-const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URL, SPOTIFY_CLIENT_ID, OPEN_WEATHER_KEY } = process.env;
+const {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  REDIRECT_URL,
+  SPOTIFY_CLIENT_ID,
+  OPEN_WEATHER_KEY,
+  HOME_ASSISTANT_URL,
+  HOME_ASSISTANT_KEY,
+} = process.env;
 const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URL);
 let spotifySdk;
 
@@ -62,8 +70,20 @@ if (!GOOGLE_CLIENT_ID) console.error('Missing env var: GOOGLE_CLIENT_ID');
 if (!GOOGLE_CLIENT_SECRET) console.error('Missing env var: GOOGLE_CLIENT_SECRET');
 if (!REDIRECT_URL) console.error('Missing env var: REDIRECT_URL');
 if (!SPOTIFY_CLIENT_ID) console.error('Missing env var: SPOTIFY_CLIENT_ID');
+if (!OPEN_WEATHER_KEY) console.error('Missing env var: OPEN_WEATHER_KEY');
+if (!HOME_ASSISTANT_URL) console.error('Missing env var: HOME_ASSISTANT_URL');
+if (!HOME_ASSISTANT_KEY) console.error('Missing env var: HOME_ASSISTANT_KEY');
 
-if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET || !REDIRECT_URL || !SPOTIFY_CLIENT_ID) process.exit(1);
+if (
+  !GOOGLE_CLIENT_ID ||
+  !GOOGLE_CLIENT_SECRET ||
+  !REDIRECT_URL ||
+  !SPOTIFY_CLIENT_ID ||
+  !OPEN_WEATHER_KEY ||
+  !HOME_ASSISTANT_URL ||
+  !HOME_ASSISTANT_KEY
+)
+  process.exit(1);
 
 if (GOOGLE_REFRESH_TOKEN) {
   oauth2Client.setCredentials({
@@ -222,6 +242,17 @@ app.get('/weather', async (req, res) => {
     .catch((err) => {
       console.error(err);
       res.status(err.cod || 500).send(err);
+    });
+});
+
+app.get('/aqi', (req, res) => {
+  fetch(HOME_ASSISTANT_URL, { headers: { Authorization: `Bearer ${HOME_ASSISTANT_KEY}` } })
+    .then((res) => res.json())
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
     });
 });
 
