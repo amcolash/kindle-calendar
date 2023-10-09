@@ -39,7 +39,7 @@ let SPOTIFY_ACCESS_TOKEN = nconf.get('spotify_access_token');
 const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',') : ['primary'];
 
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
-const clientUrl = IS_DOCKER ? `https://localhost${PORT}` : `http://localhost:${5173}`;
+const clientUrl = IS_DOCKER ? `https://192.168.1.101:${PORT}` : `http://localhost:${5173}`;
 
 const {
   GOOGLE_CLIENT_ID,
