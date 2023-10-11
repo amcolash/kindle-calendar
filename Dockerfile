@@ -3,7 +3,7 @@ FROM node:18-alpine
 
 # Install chomium
 RUN apk add --no-cache \
-  chromium imagemagick
+  chromium imagemagick font-noto-emoji
 
 # Create app directory
 WORKDIR /usr/src/app
