@@ -80,7 +80,7 @@ const server2 = require('http').createServer(app);
 
 // Make a browser for screenshots
 let browser;
-puppeteer
+const browserPromise = puppeteer
   .launch({
     headless: 'new',
     ignoreHTTPSErrors: true,
@@ -288,6 +288,9 @@ app.get('/aqi', (req, res) => {
 
 app.get('/screenshot', async (req, res) => {
   console.log(new Date().toLocaleString(), 'Taking screenshot');
+
+  // Wait for browser to be created before taking screenshot
+  await browserPromise;
 
   let page;
   try {
