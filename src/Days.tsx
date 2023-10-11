@@ -67,7 +67,7 @@ export function Days({ events, time }: DaysProps) {
             gap: '1rem',
             padding: '1rem',
             borderRadius: '1rem',
-            boxShadow: '0 0 1rem rgba(0, 0, 0, 0.1)',
+            boxShadow: '0 0 1rem rgba(0, 0, 0, 0.25)',
           }}
           key={day}
         >

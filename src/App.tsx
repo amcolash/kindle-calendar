@@ -82,7 +82,7 @@ export default function App() {
           padding: '1.5rem',
           width: '100%',
           boxSizing: 'border-box',
-          boxShadow: '0 0 1rem rgba(0, 0, 0, 0.2), 0 -5rem 3rem rgba(255, 255, 255, 1)',
+          boxShadow: '0 0 1rem rgba(0, 0, 0, 0.25), 0 -5rem 3rem rgba(255, 255, 255, 1)',
           background: 'white',
           display: 'flex',
           flexDirection: 'column',
