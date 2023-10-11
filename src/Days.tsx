@@ -1,5 +1,5 @@
 import dayjs from 'dayjs';
-import React, { useState } from 'react';
+import React from 'react';
 
 import { EventCard } from './EventCard';
 import { GoogleEvent } from './types';
