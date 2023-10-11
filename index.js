@@ -76,6 +76,18 @@ const app = express();
 app.use(bodyParser.json());
 
 const server = require('https').createServer(credentials, app);
+const server2 = require('http').createServer(app);
+
+// Make a browser for screenshots
+let browser;
+puppeteer
+  .launch({
+    headless: 'new',
+    ignoreHTTPSErrors: true,
+    executablePath: IS_DOCKER ? '/usr/bin/chromium-browser' : undefined,
+    args: ['--no-sandbox'],
+  })
+  .then((b) => (browser = b));
 
 if (!GOOGLE_CLIENT_ID) console.error('Missing env var: GOOGLE_CLIENT_ID');
 if (!GOOGLE_CLIENT_SECRET) console.error('Missing env var: GOOGLE_CLIENT_SECRET');
@@ -118,7 +130,11 @@ app.use(cors());
 app.use(express.json());
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`Server (https) listening on port ${PORT}`);
+});
+
+server2.listen(PORT + 1, '0.0.0.0', () => {
+  console.log(`Server (http) listening on port ${PORT + 1}`);
 });
 
 app.use('/', express.static('dist'));
@@ -273,20 +289,15 @@ app.get('/aqi', (req, res) => {
 app.get('/screenshot', async (req, res) => {
   console.log(new Date().toLocaleString(), 'Taking screenshot');
 
-  const browser = await puppeteer.launch({
-    headless: 'new',
-    ignoreHTTPSErrors: true,
-    executablePath: IS_DOCKER ? '/usr/bin/chromium-browser' : undefined,
-    args: ['--no-sandbox'],
-  });
+  let page;
   try {
-    const page = await browser.newPage();
+    page = await browser.newPage();
 
-    await page.setViewport({ width: 758, height: 1024 });
+    await page.setViewport({ width: 758, height: 972 });
     await page.goto(`https://localhost:${PORT}`, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
 
     const file = join(__dirname, 'screenshot.png');
-    await page.screenshot({ type: 'png', path: file, fullPage: true });
+    await page.screenshot({ type: 'png', path: file });
 
     execSync(`convert ${file} -depth 8 -colorspace gray -define png:color-type=0 -define png:bit-depth=8 ${file}`);
 
@@ -295,7 +306,7 @@ app.get('/screenshot', async (req, res) => {
     console.log(e);
     res.status(500).send(e);
   } finally {
-    await browser.close();
+    if (page) await page.close();
   }
 });
 

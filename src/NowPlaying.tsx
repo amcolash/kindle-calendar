@@ -1,24 +1,14 @@
 import { PlaybackState, Track } from '@spotify/web-api-ts-sdk';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-import { SERVER } from './util';
+interface NowPlayingProps {
+  playbackState?: PlaybackState;
+}
 
-export function NowPlaying() {
-  const [data, setData] = useState<PlaybackState>();
+export function NowPlaying({ playbackState }: NowPlayingProps) {
+  if (!playbackState || !playbackState.is_playing) return <div>Nothing is Playing</div>;
 
-  useEffect(() => {
-    fetch(`${SERVER}/now-playing`)
-      .then((res) => res.json())
-      .then((res) => setData(res))
-      .catch((e) => {
-        if (!e.toString().includes('Unexpected end of JSON input')) console.error(e);
-        setData(undefined);
-      });
-  }, []);
-
-  if (!data) return <div>Nothing is Playing</div>;
-
-  const track = data.item as Track;
+  const track = playbackState.item as Track;
   return (
     <div style={{ display: 'flex', gap: '1rem' }}>
       <img src={track.album.images[0].url} style={{ width: '9rem', height: '9rem', border: '1px solid #ccc' }} />

@@ -13,7 +13,7 @@ export function EventCard({ event, now }: EventCardProps) {
   const end = dayjs(event.end?.dateTime || event.end?.date);
 
   const allDay = event.start?.date && event.end?.date;
-  const current = (now || dayjs()).isBetween(start, end, null, '[]');
+  const current = !allDay && (now || dayjs()).isBetween(start, end, null, '[]');
 
   return (
     <div

@@ -1,20 +1,15 @@
-import { SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { PlaybackState, SpotifyApi } from '@spotify/web-api-ts-sdk';
 import dayjs from 'dayjs';
 import React, { useCallback, useEffect, useState } from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { Days } from './Days';
+import { Login, Status, loginSpotify } from './Login';
 import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';
 import { GoogleEvent } from './types';
-import { PORT, SERVER, SPOTIFY_CLIENT_ID } from './util';
-
-interface Status {
-  google?: boolean;
-  spotify?: boolean;
-  docker?: boolean;
-}
+import { SERVER } from './util';
 
 export default function App() {
   const [status, setStatus] = useState<Status>({
@@ -22,27 +17,19 @@ export default function App() {
     spotify: undefined,
     docker: undefined,
   });
+
   const [events, setEvents] = useState<GoogleEvent[]>([]);
+  const [playbackState, setPlaybackState] = useState<PlaybackState>();
+
   const [time, setTime] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
 
-  const loginSpotify = useCallback(() => {
-    localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
-
-    SpotifyApi.performUserAuthorization(
-      SPOTIFY_CLIENT_ID,
-      status.docker ? SERVER : `http://localhost:${PORT}`,
-      ['user-read-playback-state'],
-      `${SERVER}/spotify-oauth`
-    );
-  }, [SERVER, SPOTIFY_CLIENT_ID, status]);
-
   useEffect(() => {
-    if (location.search.includes('code=')) loginSpotify();
-
     fetch(`${SERVER}/status`)
       .then((res) => res.json())
       .then((res) => {
         setStatus({ google: res.google, spotify: res.spotify, docker: res.docker });
+
+        if (location.search.includes('code=')) loginSpotify(res.docker);
       });
   }, []);
 
@@ -54,39 +41,17 @@ export default function App() {
     }
   }, [status.google]);
 
-  if (!status.google || !status.spotify)
-    return (
-      <div
-        style={{
-          display: 'flex',
-          width: '100vw',
-          height: '100vh',
-          justifyContent: 'center',
-          alignItems: 'center',
-          fontSize: '2rem',
-        }}
-      >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '15rem' }}>
-          {!status.google && <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} />}
+  useEffect(() => {
+    fetch(`${SERVER}/now-playing`)
+      .then((res) => res.json())
+      .then((res) => setPlaybackState(res))
+      .catch((e) => {
+        if (!e.toString().includes('Unexpected end of JSON input')) console.error(e);
+        setPlaybackState(undefined);
+      });
+  }, []);
 
-          {!status.spotify && (
-            <button
-              onClick={loginSpotify}
-              style={{
-                padding: '1rem 2rem',
-                borderRadius: '2rem',
-                border: 'none',
-                background: '	#1DB954',
-                color: 'white',
-                fontSize: '0.65em',
-              }}
-            >
-              Log in with Spotify
-            </button>
-          )}
-        </div>
-      </div>
-    );
+  if (!status.google || !status.spotify) return <Login status={status} />;
 
   return (
     <div style={{ padding: '2rem', display: 'grid', gap: '3rem' }}>
@@ -104,7 +69,6 @@ export default function App() {
           }}
         >
           <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />
-          <div>{dayjs().format('h:mm A')}</div>
         </div>
       )}
 
@@ -126,8 +90,8 @@ export default function App() {
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <NowPlaying />
-          <Weather />
+          <NowPlaying playbackState={playbackState} />
+          <Weather playbackState={playbackState} />
         </div>
 
         <UpcomingEvent events={events} time={time} />

@@ -1,12 +1,17 @@
+import { PlaybackState } from '@spotify/web-api-ts-sdk';
 import React, { useEffect, useState } from 'react';
 import 'weather-icons/css/weather-icons.min.css';
 
 import { getIcon } from './icons';
-import { Weather } from './types';
+import { Weather as WeatherType } from './types';
 import { SERVER } from './util';
 
-export function Weather() {
-  const [weather, setWeather] = useState<Weather>();
+interface WeatherProps {
+  playbackState?: PlaybackState;
+}
+
+export function Weather({ playbackState }: WeatherProps) {
+  const [weather, setWeather] = useState<WeatherType>();
   const [aqi, setAqi] = useState<number>();
 
   useEffect(() => {
@@ -22,15 +27,23 @@ export function Weather() {
   if (!weather) return null;
 
   return (
-    <div style={{display: 'grid', gridTemplateColumns: '1fr 2fr', justifyItems: 'center', alignItems: 'baseline', gap: '1rem'}}>
+    <div
+      style={{
+        display: playbackState?.is_playing ? 'grid' : 'flex',
+        gridTemplateColumns: '1fr 2fr',
+        justifyItems: 'center',
+        alignItems: 'flex-end',
+        gap: '0.5rem 1rem',
+      }}
+    >
       <i className={getIcon(weather.weather[0])} />
-      <span style={{justifySelf: 'flex-start'}}>{weather.main.feels_like.toFixed(0)}°F</span>
+      <span style={{ justifySelf: 'flex-start' }}>{weather.main.feels_like.toFixed(0)}°F</span>
 
       <i className="wi wi-humidity" />
-      <span style={{justifySelf: 'flex-start'}}>{weather.main.humidity}%</span>
+      <span style={{ justifySelf: 'flex-start' }}>{weather.main.humidity}%</span>
 
       <i className="wi wi-smog" />
-      <span style={{justifySelf: 'flex-start'}}>{aqi}</span>
+      <span style={{ justifySelf: 'flex-start' }}>{aqi}</span>
     </div>
   );
 }
