@@ -14,16 +14,21 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
     const multiDay = end.diff(start, 'day') > 0;
     const key = start.format('MM/DD/YYYY');
 
-    days[key] = days[key] || [];
-    if (now.isBefore(end)) days[key].push(event);
-
     if (multiDay) {
-      const extraDays = end.diff(start, 'day') - 1;
-      for (let i = 1; i <= extraDays; i++) {
-        const key = start.add(i, 'day').format('MM/DD/YYYY');
-        days[key] = days[key] || [];
-        days[key].push(event);
+      const allDays = end.diff(start, 'day') - 1;
+      for (let i = 0; i <= allDays; i++) {
+        const day = start.add(i, 'day');
+
+        // Only add days that are now or in the future
+        if (day.isSameOrAfter(now, 'day')) {
+          const key = day.format('MM/DD/YYYY');
+          days[key] = days[key] || [];
+          days[key].push(event);
+        }
       }
+    } else {
+      days[key] = days[key] || [];
+      if (now.isBefore(end)) days[key].push(event);
     }
   });
 
