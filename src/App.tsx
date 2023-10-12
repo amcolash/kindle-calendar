@@ -42,14 +42,16 @@ export default function App() {
   }, [status.google]);
 
   useEffect(() => {
-    fetch(`${SERVER}/now-playing`)
-      .then((res) => res.json())
-      .then((res) => setPlaybackState(res))
-      .catch((e) => {
-        if (!e.toString().includes('Unexpected end of JSON input')) console.error(e);
-        setPlaybackState(undefined);
-      });
-  }, []);
+    if (status.spotify) {
+      fetch(`${SERVER}/now-playing`)
+        .then((res) => res.json())
+        .then((res) => setPlaybackState(res))
+        .catch((e) => {
+          if (!e.toString().includes('Unexpected end of JSON input')) console.error(e);
+          setPlaybackState(undefined);
+        });
+    }
+  }, [status.spotify]);
 
   if (!status.google || !status.spotify) return <Login status={status} />;
 
