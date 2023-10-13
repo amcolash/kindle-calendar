@@ -22,6 +22,7 @@ export function EventCard({ event, now }: EventCardProps) {
         outline: current ? '3px solid grey' : undefined,
         background: current ? '#ddd' : undefined,
         borderRadius: '0.3rem',
+        marginBottom: '0.5rem',
       }}
       key={event.id}
     >

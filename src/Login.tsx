@@ -29,21 +29,19 @@ export function Login({ status }: LoginProps) {
   return (
     <div
       style={{
-        display: 'flex',
-        width: '100vw',
-        height: '100vh',
-        justifyContent: 'center',
-        alignItems: 'center',
+        position: 'absolute',
+        transform: 'translate(-50%, -50%)',
         fontSize: '2rem',
       }}
     >
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', width: '15rem' }}>
+      <div style={{ width: '15rem' }}>
         {!status.google && <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} />}
 
         {!status.spotify && (
           <button
             onClick={() => loginSpotify(status.docker)}
             style={{
+              marginTop: '2rem',
               padding: '1rem 2rem',
               borderRadius: '2rem',
               border: 'none',

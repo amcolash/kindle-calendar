@@ -26,24 +26,36 @@ export function Weather({ playbackState }: WeatherProps) {
 
   if (!weather) return null;
 
+  const { is_playing } = playbackState || {};
+
+  const weatherStyle = {
+    display: is_playing ? undefined : 'inline-block',
+    marginBottom: is_playing ? '0.75rem' : '0.25rem',
+    marginLeft: '0.5rem',
+    verticalAlign: 'middle',
+  };
+
+  const iconStyle = {
+    marginRight: '0.75rem',
+    width: '2rem',
+  };
+
   return (
-    <div
-      style={{
-        display: playbackState?.is_playing ? 'grid' : 'flex',
-        gridTemplateColumns: '1fr 2fr',
-        justifyItems: 'center',
-        alignItems: 'flex-end',
-        gap: '0.5rem 1rem',
-      }}
-    >
-      <i className={getIcon(weather.weather[0])} />
-      <span style={{ justifySelf: 'flex-start' }}>{weather.main.feels_like.toFixed(0)}°F</span>
+    <div style={{ float: 'right' }}>
+      <div style={weatherStyle}>
+        <i className={getIcon(weather.weather[0])} style={iconStyle} />
+        <span>{weather.main.feels_like.toFixed(0)}°F</span>
+      </div>
 
-      <i className="wi wi-humidity" />
-      <span style={{ justifySelf: 'flex-start' }}>{weather.main.humidity}%</span>
+      <div style={weatherStyle}>
+        <i className="wi wi-humidity" style={iconStyle} />
+        <span>{weather.main.humidity}%</span>
+      </div>
 
-      <i className="wi wi-smog" />
-      <span style={{ justifySelf: 'flex-start' }}>{aqi}</span>
+      <div style={weatherStyle}>
+        <i className="wi wi-smog" style={iconStyle} />
+        <span>{aqi}</span>
+      </div>
     </div>
   );
 }

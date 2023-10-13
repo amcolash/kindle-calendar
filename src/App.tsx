@@ -1,7 +1,6 @@
-import { PlaybackState, SpotifyApi } from '@spotify/web-api-ts-sdk';
+import { PlaybackState } from '@spotify/web-api-ts-sdk';
 import dayjs from 'dayjs';
-import React, { useCallback, useEffect, useState } from 'react';
-import { GoogleLoginButton } from 'react-social-login-buttons';
+import React, { useEffect, useState } from 'react';
 
 import { Days } from './Days';
 import { Login, Status, loginSpotify } from './Login';
@@ -56,18 +55,15 @@ export default function App() {
   if (!status.google || !status.spotify) return <Login status={status} />;
 
   return (
-    <div style={{ padding: '2rem', display: 'grid', gap: '3rem' }}>
+    <div style={{ padding: '2rem' }}>
       {import.meta.env.DEV && (
         <div
           style={{
             position: 'fixed',
             top: '2.25rem',
             right: '2.25rem',
-            display: 'grid',
-            gap: '0.5rem',
             padding: '1rem',
             background: 'white',
-            justifyItems: 'flex-end',
           }}
         >
           <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />
@@ -86,15 +82,14 @@ export default function App() {
           boxSizing: 'border-box',
           boxShadow: '0 0 1rem rgba(0, 0, 0, 0.25), 0 -5rem 3rem rgba(255, 255, 255, 1)',
           background: 'white',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '1rem',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+        <div>
           <NowPlaying playbackState={playbackState} />
           <Weather playbackState={playbackState} />
         </div>
+
+        <div style={{ clear: 'both' }}></div>
 
         <UpcomingEvent events={events} time={time} />
       </div>

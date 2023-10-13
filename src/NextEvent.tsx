@@ -24,7 +24,7 @@ export function UpcomingEvent({ events, time }: UpcomingEventProps) {
     const future = dayjs(next.start?.dateTime || next.start?.date).isAfter(now);
     return (
       <div>
-        <div style={{ margin: '1rem -0.75rem', borderBottom: '1px solid #ddd' }}></div>
+        <div style={{ margin: '1.25rem 0', borderBottom: '1px solid #bbb' }}></div>
         {future ? 'Up Next:' : 'Happening Now:'} {next.summary}{' '}
         {future ? dayjs(next.start?.dateTime || next.start?.date).from(now) : ''}
       </div>

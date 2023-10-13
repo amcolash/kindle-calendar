@@ -12,7 +12,6 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
     const start = dayjs(event.start?.dateTime || event.start?.date);
     const end = dayjs(event.end?.dateTime || event.end?.date);
     const multiDay = end.diff(start, 'day') > 0;
-    const key = start.format('MM/DD/YYYY');
 
     if (multiDay) {
       const allDays = end.diff(start, 'day') - 1;
@@ -27,8 +26,11 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
         }
       }
     } else {
-      days[key] = days[key] || [];
-      if (now.isBefore(end)) days[key].push(event);
+      const key = start.format('MM/DD/YYYY');
+      if (start.isSameOrAfter(now, 'day')) {
+        days[key] = days[key] || [];
+        if (now.isBefore(end)) days[key].push(event);
+      }
     }
   });
 
@@ -63,32 +65,27 @@ export function Days({ events, time }: DaysProps) {
   const now = dayjs(time);
   const dayList = parseEvents(events, now);
 
-  return (
-    <div style={{ display: 'grid', gap: '2rem' }}>
-      {dayList.map(({ day, dayEvents }) => (
-        <div
-          style={{
-            display: 'grid',
-            gap: '1rem',
-            padding: '1rem',
-            borderRadius: '1rem',
-            boxShadow: '0 0 1rem rgba(0, 0, 0, 0.25)',
-          }}
-          key={day}
-        >
-          <div style={{ fontSize: '1.3em' }}>{dayjs(day).format('dddd, MMM D')}</div>
+  return dayList.map(({ day, dayEvents }) => (
+    <div
+      style={{
+        padding: '1rem',
+        borderRadius: '1rem',
+        boxShadow: '0 0 1rem rgba(0, 0, 0, 0.25)',
+        marginBottom: '2.25rem',
+      }}
+      key={day}
+    >
+      <div style={{ fontSize: '1.3em', marginBottom: '0.5rem' }}>{dayjs(day).format('dddd, MMM D')}</div>
 
-          {dayEvents.length === 0 && (
-            <div style={{ color: 'grey' }}>
-              {dayjs(day).isSame(now, 'day') ? 'No more events today' : 'No events scheduled'}
-            </div>
-          )}
-
-          {dayEvents.map((event) => (
-            <EventCard key={event.id} event={event} now={now} />
-          ))}
+      {dayEvents.length === 0 && (
+        <div style={{ color: 'grey', marginBottom: '0.5rem' }}>
+          {dayjs(day).isSame(now, 'day') ? 'No more events today' : 'No events scheduled'}
         </div>
+      )}
+
+      {dayEvents.map((event) => (
+        <EventCard key={event.id} event={event} now={now} />
       ))}
     </div>
-  );
+  ));
 }
