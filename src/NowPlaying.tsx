@@ -10,11 +10,11 @@ export function NowPlaying({ playbackState }: NowPlayingProps) {
 
   const track = playbackState.item as Track;
   return (
-    <div style={{ float: 'left' }}>
+    <div style={{ float: 'left', maxWidth: '81%' }}>
       <div style={{ float: 'left' }}>
         <img src={track.album.images[0].url} style={{ width: '9rem', height: '9rem', border: '1px solid #ccc' }} />
       </div>
-      <div style={{ marginLeft: '1rem', float: 'left', verticalAlign: 'top' }}>
+      <div style={{ marginLeft: '1rem', float: 'left', verticalAlign: 'top', maxWidth: '70%' }}>
         <span style={{ fontSize: '1.35em', marginBottom: '0.25rem' }}>{track.name}</span>
         <br />
         <span style={{ color: 'grey' }}>{track.artists.map((a) => a.name).join(', ')}</span>
