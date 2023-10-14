@@ -78,7 +78,7 @@ export function Days({ events, time }: DaysProps) {
           }}
           key={day}
         >
-          <div style={{ fontSize: '1.3em', marginBottom: '0.5rem' }}>{dayjs(day).format('dddd, MMM D')}</div>
+          <div style={{ fontSize: '1.3em', marginBottom: '0.5rem', marginLeft: '0.5rem' }}>{dayjs(day).format('dddd, MMM D')}</div>
 
           {dayEvents.length === 0 && (
             <div style={{ color: 'grey', marginBottom: '0.5rem' }}>

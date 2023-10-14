@@ -54,13 +54,13 @@ export function App() {
     }, 15 * 60 * 1000);
   }, []);
 
-  if (loadingStatus) return null;
+  if (loadingStatus || !status) return null;
 
-  if (!status || !status.google || !status.spotify) return <Login status={status} />;
+  if (!status.google || !status.spotify) return <Login status={status} />;
 
   return (
     <div style={{ padding: '1rem', maxHeight: 600, overflowY: 'auto' }}>
-      {clearScreen && (
+      {KINDLE && clearScreen && (
         <div style={{ width: '100%', height: 972, background: 'black', position: 'absolute', top: 0, left: 0, zIndex: 1 }}></div>
       )}
 
