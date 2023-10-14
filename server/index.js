@@ -229,7 +229,7 @@ app.get('/now-playing', (req, res) => {
         console.error(err);
         res.sendStatus(500);
 
-        if (err.toString().includes('Refresh token revoked')) {
+        if (err.toString().includes('Refresh token revoked') || err.toString().includes('Bad or expired token')) {
           makeSpotifySdk(undefined);
         }
       });
