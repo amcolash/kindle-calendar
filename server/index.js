@@ -3,15 +3,12 @@ const express = require('express');
 const { google } = require('googleapis');
 const bodyParser = require('body-parser');
 const nconf = require('nconf');
-const { join } = require('path');
 const { existsSync, readFileSync } = require('fs');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 const timezone = require('dayjs/plugin/timezone');
 const { SpotifyApi } = require('@spotify/web-api-ts-sdk');
 const { default: fetch } = require('node-fetch');
-const puppeteer = require('puppeteer');
-const { execSync } = require('child_process');
 
 const IS_DOCKER = existsSync('/.dockerenv');
 
@@ -78,17 +75,6 @@ app.use(bodyParser.json());
 const server = require('https').createServer(credentials, app);
 const server2 = require('http').createServer(app);
 
-// Make a browser for screenshots
-let browser;
-const browserPromise = puppeteer
-  .launch({
-    headless: 'new',
-    ignoreHTTPSErrors: true,
-    executablePath: IS_DOCKER ? '/usr/bin/chromium-browser' : undefined,
-    args: ['--no-sandbox'],
-  })
-  .then((b) => (browser = b));
-
 if (!GOOGLE_CLIENT_ID) console.error('Missing env var: GOOGLE_CLIENT_ID');
 if (!GOOGLE_CLIENT_SECRET) console.error('Missing env var: GOOGLE_CLIENT_SECRET');
 if (!REDIRECT_URL) console.error('Missing env var: REDIRECT_URL');
@@ -136,8 +122,6 @@ server.listen(PORT, '0.0.0.0', () => {
 server2.listen(PORT + 1, '0.0.0.0', () => {
   console.log(`Server (http) listening on port ${PORT + 1}`);
 });
-
-app.use('/', express.static('dist'));
 
 app.get('/status', (req, res) => {
   res.send({
@@ -284,33 +268,6 @@ app.get('/aqi', (req, res) => {
     .catch((err) => {
       res.status(500).send(err);
     });
-});
-
-app.get('/screenshot', async (req, res) => {
-  console.log(new Date().toLocaleString(), 'Taking screenshot');
-
-  // Wait for browser to be created before taking screenshot
-  await browserPromise;
-
-  let page;
-  try {
-    page = await browser.newPage();
-
-    await page.setViewport({ width: 758, height: 972 });
-    await page.goto(`https://localhost:${PORT}`, { waitUntil: ['load', 'domcontentloaded', 'networkidle0'] });
-
-    const file = join(__dirname, 'screenshot.png');
-    await page.screenshot({ type: 'png', path: file });
-
-    execSync(`convert ${file} -depth 8 -colorspace gray -define png:color-type=0 -define png:bit-depth=8 ${file}`);
-
-    res.status(200).sendFile(file);
-  } catch (e) {
-    console.log(e);
-    res.status(500).send(e);
-  } finally {
-    if (page) await page.close();
-  }
 });
 
 // Functions
