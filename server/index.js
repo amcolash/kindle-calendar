@@ -335,7 +335,7 @@ function makeSpotifySdk(token) {
   if (SPOTIFY_CLIENT_ID) {
     SPOTIFY_ACCESS_TOKEN = token;
 
-    if (token) spotifySdk = SpotifyApi.withAccessToken(SPOTIFY_CLIENT_ID, SPOTIFY_ACCESS_TOKEN);
+    if (token && token.expires) spotifySdk = SpotifyApi.withAccessToken(SPOTIFY_CLIENT_ID, SPOTIFY_ACCESS_TOKEN);
     else spotifySdk = undefined;
 
     nconf.set('spotify_access_token', token?.expires === -1 ? undefined : token);
