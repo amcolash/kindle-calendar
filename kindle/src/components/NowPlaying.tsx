@@ -13,8 +13,8 @@ interface NowPlayingProps {
 
 const iconStyle: React.CSSProperties = {
   position: 'absolute',
-  bottom: '-1.5rem',
-  left: '0.5rem',
+  bottom: '-1rem',
+  right: '0.5rem',
 
   lineHeight: '0',
   padding: '0.5rem',
@@ -43,9 +43,9 @@ export function NowPlaying({ playbackState, updatePlaybackState }: NowPlayingPro
         />
         <button style={iconStyle}>
           {playbackState.is_playing ? (
-            <PauseIcon onClick={() => fetch(`${SERVER}/pause`).then(updatePlaybackState)} />
+            <PauseIcon onClick={() => fetch(`${SERVER}/spotify/pause`).then(updatePlaybackState)} />
           ) : (
-            <PlayIcon onClick={() => fetch(`${SERVER}/play`).then(updatePlaybackState)} />
+            <PlayIcon onClick={() => fetch(`${SERVER}/spotify/play`).then(updatePlaybackState)} />
           )}
         </button>
       </div>

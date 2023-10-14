@@ -47,8 +47,11 @@ const {
   HOME_ASSISTANT_URL,
   HOME_ASSISTANT_KEY,
 } = process.env;
+
 const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URL);
+
 let spotifySdk;
+let currentDeviceId;
 
 // HTTPS setup
 const credentials = {};
@@ -212,6 +215,9 @@ app.get('/now-playing', (req, res) => {
     spotifySdk.player
       .getPlaybackState()
       .then((data) => {
+        if (data) currentDeviceId = data.device.id;
+        else currentDeviceId = undefined;
+
         // console.log(data);
         res.send(data);
 
@@ -235,9 +241,9 @@ app.get('/now-playing', (req, res) => {
 });
 
 app.get('/spotify/play', (req, res) => {
-  if (spotifySdk) {
+  if (spotifySdk && currentDeviceId) {
     spotifySdk.player
-      .play()
+      .startResumePlayback(currentDeviceId)
       .then((data) => {
         res.send(data);
       })
@@ -253,9 +259,9 @@ app.get('/spotify/play', (req, res) => {
 });
 
 app.get('/spotify/pause', (req, res) => {
-  if (spotifySdk) {
+  if (spotifySdk && currentDeviceId) {
     spotifySdk.player
-      .pause()
+      .pausePlayback(currentDeviceId)
       .then((data) => {
         res.send(data);
       })
@@ -271,9 +277,9 @@ app.get('/spotify/pause', (req, res) => {
 });
 
 app.get('/spotify/skip', (req, res) => {
-  if (spotifySdk) {
+  if (spotifySdk && currentDeviceId) {
     spotifySdk.player
-      .next()
+      .skipToNext(currentDeviceId)
       .then((data) => {
         res.send(data);
       })
