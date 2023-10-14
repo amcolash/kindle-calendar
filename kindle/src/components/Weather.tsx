@@ -1,10 +1,10 @@
 import { PlaybackState } from '@spotify/web-api-ts-sdk';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import 'weather-icons/css/weather-icons.min.css';
 
-import { getIcon } from './icons';
-import { Weather as WeatherType } from './types';
-import { SERVER } from './util';
+import { getIcon } from '../util/icons';
+import { Weather as WeatherType } from '../types';
+import { SERVER } from '../util/util';
 
 interface WeatherProps {
   playbackState?: PlaybackState;
@@ -28,17 +28,18 @@ export function Weather({ playbackState }: WeatherProps) {
 
   const { is_playing } = playbackState || {};
 
-  const weatherStyle = {
+  const weatherStyle: React.CSSProperties = {
     display: is_playing ? undefined : 'inline-block',
     marginBottom: is_playing ? '0.75rem' : '0.25rem',
-    marginLeft: is_playing ? '0.5rem' : '1rem',
+    marginLeft: is_playing ? '0.25rem' : undefined,
     verticalAlign: 'middle',
+    fontSize: '1.1rem',
   };
 
-  const iconStyle = {
-    marginRight: is_playing ? '0.75rem' : '0.5rem',
-    width: is_playing ? '2rem' : undefined,
-    textAlign: 'right',
+  const iconStyle: React.CSSProperties = {
+    marginRight: is_playing ? '0.5rem' : '0.25rem',
+    width: is_playing ? '1.5rem' : undefined,
+    textAlign: 'center',
   };
 
   return (

@@ -1,4 +1,4 @@
-import { WeatherElement } from './types';
+import { WeatherElement } from '../types';
 
 export function getIcon(weather: WeatherElement): string {
   const icon = weather.icon;

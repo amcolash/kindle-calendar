@@ -1,9 +1,8 @@
 import dayjs from 'dayjs';
-import React from 'react';
 
 import { EventCard } from './EventCard';
-import { GoogleEvent } from './types';
-import { sortEvents } from './util';
+import { GoogleEvent } from '../types';
+import { sortEvents } from '../util/util';
 
 function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
   // Group events by day, and filter out events that have already ended
@@ -57,35 +56,41 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
 }
 
 interface DaysProps {
-  events: GoogleEvent[];
+  events?: GoogleEvent[];
   time: string;
 }
 
 export function Days({ events, time }: DaysProps) {
+  if (!events) return null;
+
   const now = dayjs(time);
   const dayList = parseEvents(events, now);
 
-  return dayList.map(({ day, dayEvents }) => (
-    <div
-      style={{
-        padding: '1rem',
-        borderRadius: '1rem',
-        boxShadow: '0 0 1rem rgba(0, 0, 0, 0.25)',
-        marginBottom: '2.25rem',
-      }}
-      key={day}
-    >
-      <div style={{ fontSize: '1.3em', marginBottom: '0.5rem' }}>{dayjs(day).format('dddd, MMM D')}</div>
+  return (
+    <>
+      {dayList.map(({ day, dayEvents }) => (
+        <div
+          style={{
+            padding: '0.75rem',
+            borderRadius: '0.75rem',
+            boxShadow: '0 0 0.5rem rgba(0, 0, 0, 0.35)',
+            marginBottom: '1.5rem',
+          }}
+          key={day}
+        >
+          <div style={{ fontSize: '1.3em', marginBottom: '0.5rem' }}>{dayjs(day).format('dddd, MMM D')}</div>
 
-      {dayEvents.length === 0 && (
-        <div style={{ color: 'grey', marginBottom: '0.5rem' }}>
-          {dayjs(day).isSame(now, 'day') ? 'No more events today' : 'No events scheduled'}
+          {dayEvents.length === 0 && (
+            <div style={{ color: 'grey', marginBottom: '0.5rem' }}>
+              {dayjs(day).isSame(now, 'day') ? 'No more events today' : 'No events scheduled'}
+            </div>
+          )}
+
+          {dayEvents.map((event) => (
+            <EventCard key={event.id} event={event} now={now} />
+          ))}
         </div>
-      )}
-
-      {dayEvents.map((event) => (
-        <EventCard key={event.id} event={event} now={now} />
       ))}
-    </div>
-  ));
+    </>
+  );
 }

@@ -4,10 +4,13 @@ import isSameOrAfter from 'dayjs/plugin/isSameOrAfter';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import timezone from 'dayjs/plugin/timezone';
 import utc from 'dayjs/plugin/utc';
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 
-import App from './App';
+import 'cross-fetch/polyfill';
+
+import './index.css';
+
+import { App } from './components/App';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

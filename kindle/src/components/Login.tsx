@@ -1,8 +1,7 @@
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
-import React from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
-import { PORT, SERVER, SPOTIFY_CLIENT_ID } from './util';
+import { PORT, SERVER, SPOTIFY_CLIENT_ID } from '../util/util';
 
 export interface Status {
   google?: boolean;
@@ -11,7 +10,7 @@ export interface Status {
 }
 
 interface LoginProps {
-  status: Status;
+  status?: Status;
 }
 
 export function loginSpotify(isDocker?: boolean) {
@@ -31,23 +30,32 @@ export function Login({ status }: LoginProps) {
       style={{
         position: 'absolute',
         transform: 'translate(-50%, -50%)',
-        fontSize: '2rem',
+        WebkitTransform: 'translate(-50%, -50%)',
+        top: '50%',
+        left: '50%',
+        textAlign: 'center',
       }}
     >
       <div style={{ width: '15rem' }}>
-        {!status.google && <GoogleLoginButton onClick={() => (location.href = `${SERVER}/oauth`)} />}
-
-        {!status.spotify && (
+        Server is {SERVER}
+        {!status?.google && (
+          <GoogleLoginButton
+            onClick={() => (window.location.href = `${SERVER}/oauth`)}
+            style={{ marginTop: '1rem', height: '2.5rem', width: '100%', fontSize: '0.75rem' }}
+          />
+        )}
+        {!status?.spotify && (
           <button
-            onClick={() => loginSpotify(status.docker)}
+            onClick={() => loginSpotify(status?.docker)}
             style={{
-              marginTop: '2rem',
-              padding: '1rem 2rem',
+              marginTop: '1rem',
+              height: '2.5rem',
+              width: '100%',
               borderRadius: '2rem',
               border: 'none',
               background: '	#1DB954',
               color: 'white',
-              fontSize: '0.65em',
+              fontSize: '0.75rem',
             }}
           >
             Log in with Spotify

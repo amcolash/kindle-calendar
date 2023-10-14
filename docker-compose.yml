@@ -2,7 +2,7 @@ version: '3.2'
 services:
   server:
     image: amcolash/kindle-calendar
-    build: ./
+    build: ./server
     container_name: kindle-calendar
     restart: unless-stopped
     network_mode: 'host'
@@ -10,4 +10,4 @@ services:
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - ./.cert:/usr/src/app/.cert:ro
-      - ./settings.json:/usr/src/app/settings.json
+      - ./server/settings.json:/usr/src/app/settings.json

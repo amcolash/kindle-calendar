@@ -132,3 +132,6 @@ dist
 .cert
 settings.json
 screenshot.png
+build/
+date.json
+config.xml

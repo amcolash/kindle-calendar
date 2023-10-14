@@ -1,14 +1,15 @@
 import dayjs from 'dayjs';
-import React from 'react';
 
-import { GoogleEvent } from './types';
+import { GoogleEvent } from '../types';
 
 interface UpcomingEventProps {
-  events: GoogleEvent[];
+  events?: GoogleEvent[];
   time: string;
 }
 
 export function UpcomingEvent({ events, time }: UpcomingEventProps) {
+  if (!events) return null;
+
   const now = dayjs(time);
 
   const filteredEvents = events
@@ -24,9 +25,8 @@ export function UpcomingEvent({ events, time }: UpcomingEventProps) {
     const future = dayjs(next.start?.dateTime || next.start?.date).isAfter(now);
     return (
       <div>
-        <div style={{ margin: '1.25rem 0', borderBottom: '1px solid #bbb' }}></div>
-        {future ? 'Up Next:' : 'Happening Now:'} {next.summary}{' '}
-        {future ? dayjs(next.start?.dateTime || next.start?.date).from(now) : ''}
+        <div style={{ margin: '0.75rem 0', borderBottom: '1px solid #999' }}></div>
+        {future ? 'Up Next:' : 'Happening Now:'} {next.summary} {future ? dayjs(next.start?.dateTime || next.start?.date).from(now) : ''}
       </div>
     );
   }

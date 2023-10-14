@@ -1,7 +1,6 @@
 import dayjs from 'dayjs';
-import React from 'react';
 
-import { GoogleEvent } from './types';
+import { GoogleEvent } from '../types';
 
 interface EventCardProps {
   event: GoogleEvent;
@@ -28,9 +27,7 @@ export function EventCard({ event, now }: EventCardProps) {
     >
       {event.summary}
 
-      <div style={{ marginTop: '0.25rem' }}>
-        {allDay ? 'All Day' : `${start.format('h:mm A')} - ${end.format('h:mm A')}`}
-      </div>
+      <div style={{ marginTop: '0.25rem' }}>{allDay ? 'All Day' : `${start.format('h:mm A')} - ${end.format('h:mm A')}`}</div>
     </div>
   );
 }
