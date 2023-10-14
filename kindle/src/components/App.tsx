@@ -94,6 +94,7 @@ export function App() {
           bottom: 0,
           left: 0,
           padding: '1rem',
+          paddingBottom: '0.75rem',
           width: '100%',
           boxSizing: 'border-box',
           boxShadow: '0 0 1rem rgba(0, 0, 0, 0.35), 0 -2rem 3rem rgba(255, 255, 255, 1)',

@@ -26,19 +26,17 @@ export function Weather({ playbackState }: WeatherProps) {
 
   if (!weather) return null;
 
-  const { is_playing } = playbackState || {};
-
   const weatherStyle: React.CSSProperties = {
-    display: is_playing ? undefined : 'inline-block',
-    marginBottom: is_playing ? '0.75rem' : '0.25rem',
-    marginLeft: is_playing ? '0.25rem' : '0.5rem',
+    display: playbackState ? undefined : 'inline-block',
+    marginBottom: playbackState ? '0.75rem' : '0.25rem',
+    marginLeft: playbackState ? '0.25rem' : '0.5rem',
     verticalAlign: 'middle',
     fontSize: '1.1rem',
   };
 
   const iconStyle: React.CSSProperties = {
-    marginRight: is_playing ? '0.5rem' : '0.25rem',
-    width: is_playing ? '1.5rem' : undefined,
+    marginRight: playbackState ? '0.5rem' : '0.25rem',
+    width: playbackState ? '1.5rem' : undefined,
     textAlign: 'center',
   };
 

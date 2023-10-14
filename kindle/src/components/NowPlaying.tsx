@@ -1,10 +1,10 @@
 import { PlaybackState, Track } from '@spotify/web-api-ts-sdk';
 import React from 'react';
 
-import { ReactComponent as PauseIcon } from '../icons/pause.svg';
-import { ReactComponent as PlayIcon } from '../icons/play.svg';
-import { ReactComponent as SkipIcon } from '../icons/skip-forward.svg';
-import { SERVER, delay } from '../util/util';
+import PauseIcon from '../icons/pause.png';
+import PlayIcon from '../icons/play.png';
+import SkipIcon from '../icons/skip.png';
+import { KINDLE, SERVER, delay } from '../util/util';
 
 interface NowPlayingProps {
   playbackState?: PlaybackState;
@@ -13,33 +13,39 @@ interface NowPlayingProps {
 
 const iconStyle: React.CSSProperties = {
   position: 'absolute',
-  bottom: '-1rem',
-  right: '0.5rem',
+  bottom: '0',
+  left: '0.35rem',
 
-  lineHeight: '0',
-  padding: '0.5rem',
+  padding: 0,
+  border: 'none',
+};
 
-  color: 'white',
-  background: 'rgb(29, 185, 84)',
-  border: '3px solid rgb(85, 85, 85)',
-  borderRadius: '100%',
+const imgStyle: React.CSSProperties = {
+  width: '2rem',
+  height: '2rem',
+  opacity: 0.75,
 };
 
 export function NowPlaying({ playbackState, updatePlaybackState }: NowPlayingProps) {
-  if (!playbackState || !playbackState.is_playing)
+  if (!playbackState)
     return (
       <div style={{ float: 'left' }}>
-        <button style={{ ...iconStyle, position: 'unset', padding: '0.25rem', marginRight: '0.25rem' }}>
-          <PlayIcon onClick={() => fetch(`${SERVER}/spotify/play`).then(() => delay(updatePlaybackState, 500))} />
+        <button style={{ ...iconStyle, position: 'unset', marginRight: '0.25rem' }}>
+          <img
+            src={PlayIcon}
+            onClick={() => fetch(`${SERVER}/spotify/play`).then(() => delay(updatePlaybackState, 500))}
+            style={imgStyle}
+            alt="play"
+          />
         </button>
-        Nothing is Playing
+        <span>Nothing is Playing</span>
       </div>
     );
 
   const track = playbackState.item as Track;
   return (
     <div style={{ float: 'left', maxWidth: '81%' }}>
-      <div style={{ float: 'left', position: 'relative', height: '6rem', width: '6rem', marginBottom: '1.5rem' }}>
+      <div style={{ float: 'left', position: 'relative', height: '6rem', width: '6rem' }}>
         <img
           src={track.album.images[0].url}
           style={{
@@ -51,15 +57,49 @@ export function NowPlaying({ playbackState, updatePlaybackState }: NowPlayingPro
         />
         <button style={iconStyle}>
           {playbackState.is_playing ? (
-            <PauseIcon onClick={() => fetch(`${SERVER}/spotify/pause`).then(() => delay(updatePlaybackState, 500))} />
+            <img
+              src={PauseIcon}
+              onClick={() =>
+                fetch(`${SERVER}/spotify/pause`).then(() => delay(updatePlaybackState, KINDLE ? 1500 : 500))
+              }
+              style={imgStyle}
+              alt="pause"
+            />
           ) : (
-            <PlayIcon onClick={() => fetch(`${SERVER}/spotify/play`).then(() => delay(updatePlaybackState, 500))} />
+            <img
+              src={PlayIcon}
+              onClick={() =>
+                fetch(`${SERVER}/spotify/play`).then(() => delay(updatePlaybackState, KINDLE ? 1500 : 500))
+              }
+              style={imgStyle}
+              alt="play"
+            />
           )}
+        </button>
+        <button style={{ ...iconStyle, left: undefined, right: '0.35rem' }}>
+          <img
+            src={SkipIcon}
+            onClick={() => fetch(`${SERVER}/spotify/skip`).then(() => delay(updatePlaybackState, KINDLE ? 1500 : 500))}
+            style={imgStyle}
+            alt="skip"
+          />
         </button>
       </div>
       <div style={{ marginLeft: '0.75rem', float: 'left', verticalAlign: 'top', maxWidth: '65%' }}>
-        <span style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>{track.name}</span>
-        <br />
+        <span
+          style={{
+            fontSize: '1.25rem',
+            marginBottom: '0.5rem',
+            maxHeight: '3rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: 'block',
+            WebkitLineClamp: 2,
+          }}
+        >
+          {track.name}
+        </span>
+
         <span style={{ color: 'grey', fontSize: '1.1rem' }}>
           {track.artists
             .slice(0, 3)

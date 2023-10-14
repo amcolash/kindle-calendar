@@ -1,6 +1,6 @@
 import { GoogleEvent } from '../types';
 
-const local = true;
+const local = false;
 
 export const PORT = 8501;
 export const SERVER: string = local ? 'https://localhost:8501' : `https://192.168.1.101:${PORT}`;
