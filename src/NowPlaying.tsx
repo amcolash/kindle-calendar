@@ -6,7 +6,7 @@ interface NowPlayingProps {
 }
 
 export function NowPlaying({ playbackState }: NowPlayingProps) {
-  if (!playbackState || !playbackState.is_playing) return <div>Nothing is Playing</div>;
+  if (!playbackState || !playbackState.is_playing) return <div style={{ float: 'left' }}>Nothing is Playing</div>;
 
   const track = playbackState.item as Track;
   return (

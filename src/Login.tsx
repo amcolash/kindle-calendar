@@ -1,5 +1,5 @@
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { PORT, SERVER, SPOTIFY_CLIENT_ID } from './util';
