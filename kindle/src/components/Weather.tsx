@@ -31,7 +31,7 @@ export function Weather({ playbackState }: WeatherProps) {
   const weatherStyle: React.CSSProperties = {
     display: is_playing ? undefined : 'inline-block',
     marginBottom: is_playing ? '0.75rem' : '0.25rem',
-    marginLeft: is_playing ? '0.25rem' : undefined,
+    marginLeft: is_playing ? '0.25rem' : '0.5rem',
     verticalAlign: 'middle',
     fontSize: '1.1rem',
   };

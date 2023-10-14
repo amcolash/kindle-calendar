@@ -33,10 +33,12 @@ dayjs.tz.setDefault('America/Pacific');
 let GOOGLE_REFRESH_TOKEN = nconf.get('google_refresh_token');
 let SPOTIFY_ACCESS_TOKEN = nconf.get('spotify_access_token');
 
+if (SPOTIFY_ACCESS_TOKEN && !SPOTIFY_ACCESS_TOKEN.expires) SPOTIFY_ACCESS_TOKEN = undefined;
+
 const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',') : ['primary'];
 
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
-const clientUrl = IS_DOCKER ? `https://192.168.1.101:${PORT}` : `http://localhost:${5173}`;
+const clientUrl = IS_DOCKER ? `https://192.168.1.101:${PORT}` : `http://localhost:${3000}`;
 
 const {
   GOOGLE_CLIENT_ID,
@@ -205,12 +207,12 @@ app.get('/oauth', async (req, res) => {
   }
 });
 
-app.get('/spotify-oauth', (req, res) => {
+app.post('/spotify/oauth', (req, res) => {
   makeSpotifySdk(req.body);
   res.redirect(clientUrl);
 });
 
-app.get('/now-playing', (req, res) => {
+app.get('/spotify/now-playing', (req, res) => {
   if (spotifySdk) {
     spotifySdk.player
       .getPlaybackState()

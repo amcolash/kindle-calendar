@@ -4,7 +4,7 @@ import React from 'react';
 import { ReactComponent as PauseIcon } from '../icons/pause.svg';
 import { ReactComponent as PlayIcon } from '../icons/play.svg';
 import { ReactComponent as SkipIcon } from '../icons/skip-forward.svg';
-import { SERVER } from '../util/util';
+import { SERVER, delay } from '../util/util';
 
 interface NowPlayingProps {
   playbackState?: PlaybackState;
@@ -26,7 +26,15 @@ const iconStyle: React.CSSProperties = {
 };
 
 export function NowPlaying({ playbackState, updatePlaybackState }: NowPlayingProps) {
-  if (!playbackState || !playbackState.is_playing) return <div style={{ float: 'left' }}>Nothing is Playing</div>;
+  if (!playbackState || !playbackState.is_playing)
+    return (
+      <div style={{ float: 'left' }}>
+        <button style={{ ...iconStyle, position: 'unset', padding: '0.25rem', marginRight: '0.25rem' }}>
+          <PlayIcon onClick={() => fetch(`${SERVER}/spotify/play`).then(() => delay(updatePlaybackState, 500))} />
+        </button>
+        Nothing is Playing
+      </div>
+    );
 
   const track = playbackState.item as Track;
   return (
@@ -43,9 +51,9 @@ export function NowPlaying({ playbackState, updatePlaybackState }: NowPlayingPro
         />
         <button style={iconStyle}>
           {playbackState.is_playing ? (
-            <PauseIcon onClick={() => fetch(`${SERVER}/spotify/pause`).then(updatePlaybackState)} />
+            <PauseIcon onClick={() => fetch(`${SERVER}/spotify/pause`).then(() => delay(updatePlaybackState, 500))} />
           ) : (
-            <PlayIcon onClick={() => fetch(`${SERVER}/spotify/play`).then(updatePlaybackState)} />
+            <PlayIcon onClick={() => fetch(`${SERVER}/spotify/play`).then(() => delay(updatePlaybackState, 500))} />
           )}
         </button>
       </div>

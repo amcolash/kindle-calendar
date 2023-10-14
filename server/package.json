@@ -4,7 +4,7 @@
   "description": "Server for dashboard",
   "main": "index.js",
   "scripts": {
-    "start:server": "nodemon index.js --ignore settings.json",
+    "start": "nodemon index.js --ignore settings.json",
     "start:docker": "node index.js"
   },
   "dependencies": {

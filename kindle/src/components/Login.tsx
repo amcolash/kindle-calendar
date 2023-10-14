@@ -14,13 +14,13 @@ interface LoginProps {
 }
 
 export function loginSpotify(isDocker?: boolean) {
-  localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
+  // localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
 
   SpotifyApi.performUserAuthorization(
     SPOTIFY_CLIENT_ID,
-    isDocker ? `${SERVER}/spotify-oauth` : `http://localhost:${PORT}/spotify-oauth`,
+    isDocker ? `${SERVER}` : `http://localhost:3000/`,
     ['user-read-playback-state', 'user-modify-playback-state'],
-    `${SERVER}/spotify-oauth`
+    `${SERVER}/spotify/oauth`
   );
 }
 
