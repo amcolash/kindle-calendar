@@ -2,8 +2,8 @@ import { PlaybackState } from '@spotify/web-api-ts-sdk';
 import { useEffect, useState } from 'react';
 import 'weather-icons/css/weather-icons.min.css';
 
-import { getIcon } from '../util/icons';
 import { Weather as WeatherType } from '../types';
+import { getIcon } from '../util/iconMapping';
 import { SERVER } from '../util/util';
 
 interface WeatherProps {

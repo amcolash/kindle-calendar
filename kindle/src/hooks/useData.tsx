@@ -23,5 +23,5 @@ export function useData<T>(url: string, interval?: number) {
     }
   }, [interval, url]);
 
-  return { data, loading };
+  return { data, loading, forceUpdate: () => getData<T>(url).then((newData) => setData(newData)) };
 }

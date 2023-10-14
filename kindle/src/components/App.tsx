@@ -2,16 +2,15 @@ import { PlaybackState } from '@spotify/web-api-ts-sdk';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
+import { useData } from '../hooks/useData';
+import { GoogleEvent } from '../types';
+import { KINDLE, SERVER } from '../util/util';
 import { Days } from './Days';
+import { KindleAPI } from './Kindle';
 import { Login, Status, loginSpotify } from './Login';
 import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';
-import { GoogleEvent } from '../types';
-import { KINDLE, SERVER } from '../util/util';
-import { useData } from '../hooks/useData';
-
-import { KindleAPI } from './Kindle';
 
 let initialDate: string;
 
@@ -22,7 +21,10 @@ export function App() {
   const { data: events } = useData<GoogleEvent[]>(`${SERVER}/events`, 5 * 60 * 1000);
 
   const [playbackUpdate, setPlaybackUpdate] = useState(60 * 1000);
-  const { data: playbackState } = useData<PlaybackState>(`${SERVER}/now-playing`, playbackUpdate);
+  const { data: playbackState, forceUpdate: updatePlaybackState } = useData<PlaybackState>(
+    `${SERVER}/now-playing`,
+    playbackUpdate
+  );
 
   const { data: refreshDate } = useData<{ date: string }>('./date.json', 1000);
 
@@ -48,10 +50,13 @@ export function App() {
     setTimeout(() => setClearScreen(true), 500);
     setTimeout(() => setClearScreen(false), 1000);
 
-    setInterval(() => {
-      setTimeout(() => setClearScreen(true), 500);
-      setTimeout(() => setClearScreen(false), 1000);
-    }, 15 * 60 * 1000);
+    setInterval(
+      () => {
+        setTimeout(() => setClearScreen(true), 500);
+        setTimeout(() => setClearScreen(false), 1000);
+      },
+      15 * 60 * 1000
+    );
   }, []);
 
   if (loadingStatus || !status) return null;
@@ -61,7 +66,9 @@ export function App() {
   return (
     <div style={{ padding: '1rem', maxHeight: 600, overflowY: 'auto' }}>
       {KINDLE && clearScreen && (
-        <div style={{ width: '100%', height: 972, background: 'black', position: 'absolute', top: 0, left: 0, zIndex: 1 }}></div>
+        <div
+          style={{ width: '100%', height: 972, background: 'black', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+        ></div>
       )}
 
       {process.env.DEV && (
@@ -94,7 +101,7 @@ export function App() {
         }}
       >
         <div>
-          <NowPlaying playbackState={playbackState} />
+          <NowPlaying playbackState={playbackState} updatePlaybackState={updatePlaybackState} />
           <Weather playbackState={playbackState} />
         </div>
 

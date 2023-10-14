@@ -234,6 +234,60 @@ app.get('/now-playing', (req, res) => {
   res.sendStatus(401);
 });
 
+app.get('/spotify/play', (req, res) => {
+  if (spotifySdk) {
+    spotifySdk.player
+      .play()
+      .then((data) => {
+        res.send(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.sendStatus(500);
+      });
+
+    return;
+  }
+
+  res.sendStatus(401);
+});
+
+app.get('/spotify/pause', (req, res) => {
+  if (spotifySdk) {
+    spotifySdk.player
+      .pause()
+      .then((data) => {
+        res.send(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.sendStatus(500);
+      });
+
+    return;
+  }
+
+  res.sendStatus(401);
+});
+
+app.get('/spotify/skip', (req, res) => {
+  if (spotifySdk) {
+    spotifySdk.player
+      .next()
+      .then((data) => {
+        res.send(data);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.sendStatus(500);
+      });
+
+    return;
+  }
+
+  res.sendStatus(401);
+});
+
 let weatherCache = { lastUpdated: 0, data: {} };
 app.get('/weather', async (req, res) => {
   const lat = '47.687210';
