@@ -205,7 +205,7 @@ app.get('/oauth', async (req, res) => {
   }
 });
 
-app.post('/spotify-oauth', (req, res) => {
+app.get('/spotify-oauth', (req, res) => {
   makeSpotifySdk(req.body);
   res.redirect(clientUrl);
 });

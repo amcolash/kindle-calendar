@@ -26,7 +26,7 @@ export function App() {
     playbackUpdate
   );
 
-  const { data: refreshDate } = useData<{ date: string }>('./date.json', 1000);
+  const { data: refreshDate } = useData<{ date: string }>('./date.json', KINDLE ? 1000 : undefined);
 
   const [now, setNow] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
 

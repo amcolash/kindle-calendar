@@ -18,8 +18,8 @@ export function loginSpotify(isDocker?: boolean) {
 
   SpotifyApi.performUserAuthorization(
     SPOTIFY_CLIENT_ID,
-    isDocker ? SERVER : `http://localhost:${PORT}`,
-    ['user-read-playback-state'],
+    isDocker ? `${SERVER}/spotify-oauth` : `http://localhost:${PORT}/spotify-oauth`,
+    ['user-read-playback-state', 'user-modify-playback-state'],
     `${SERVER}/spotify-oauth`
   );
 }
