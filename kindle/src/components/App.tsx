@@ -9,6 +9,7 @@ import { useRerender } from '../hooks/useRerender';
 import { GoogleEvent } from '../types';
 import { SERVER } from '../util/util';
 import { Days } from './Days';
+import { KindleButtons } from './KindleButtons';
 import { Login, Status, loginSpotify } from './Login';
 import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
@@ -47,6 +48,8 @@ export function App() {
   return (
     <div style={{ padding: '1rem', maxHeight: playbackState?.is_playing ? 600 : 760, overflowY: 'auto' }}>
       {clearScreenEl}
+
+      <KindleButtons />
       {/* <DebugTime now={now} setNow={setNow} /> */}
 
       <Days events={events} time={now} />
