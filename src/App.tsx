@@ -64,6 +64,7 @@ export default function App() {
             right: '2.25rem',
             padding: '1rem',
             background: 'white',
+            lineHeight: '1rem',
           }}
         >
           <input type="datetime-local" value={time} onChange={(e) => setTime(e.target.value)} />
