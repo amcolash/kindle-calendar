@@ -31,13 +31,14 @@ export function Weather({ playbackState }: WeatherProps) {
   const weatherStyle = {
     display: is_playing ? undefined : 'inline-block',
     marginBottom: is_playing ? '0.75rem' : '0.25rem',
-    marginLeft: '0.5rem',
+    marginLeft: is_playing ? '0.5rem' : '1rem',
     verticalAlign: 'middle',
   };
 
   const iconStyle = {
-    marginRight: '0.75rem',
-    width: '2rem',
+    marginRight: is_playing ? '0.75rem' : '0.5rem',
+    width: is_playing ? '2rem' : undefined,
+    textAlign: 'right',
   };
 
   return (
