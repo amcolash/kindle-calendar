@@ -2,22 +2,23 @@ import { PlaybackState } from '@spotify/web-api-ts-sdk';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
+import { useClearScreen } from '../hooks/useClearScreen';
 import { useData } from '../hooks/useData';
+import { useRefresh } from '../hooks/useRefresh';
+import { useRerender } from '../hooks/useRerender';
 import { GoogleEvent } from '../types';
-import { KINDLE, SERVER } from '../util/util';
+import { SERVER } from '../util/util';
 import { Days } from './Days';
-import { KindleAPI } from './Kindle';
 import { Login, Status, loginSpotify } from './Login';
 import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';
 
-let initialDate: string;
-
 export function App() {
-  const [clearScreen, setClearScreen] = useState(false);
+  const { clearScreenEl } = useClearScreen(); // Clear screen every 15 minutes
+  useRefresh(); // Refresh page when build changes on Kindle
 
-  const { data: status, loading: loadingStatus } = useData<Status>(`${SERVER}/status`);
+  const { data: status, loading: loadingStatus } = useData<Status>(`${SERVER}/status`, 5 * 60 * 1000);
   const { data: events } = useData<GoogleEvent[]>(`${SERVER}/events`, 5 * 60 * 1000);
 
   const [playbackUpdate, setPlaybackUpdate] = useState(60 * 1000);
@@ -26,16 +27,10 @@ export function App() {
     playbackUpdate
   );
 
-  const { data: refreshDate } = useData<{ date: string }>('./date.json', KINDLE ? 1000 : undefined);
+  useRerender(60 * 1000); // Refresh page every minute, on the minute
+  const now = dayjs().format('YYYY-MM-DDTHH:mm');
 
-  const [now, setNow] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
-
-  useEffect(() => {
-    if (!initialDate && refreshDate?.date) {
-      initialDate = refreshDate.date;
-      if (KINDLE) KindleAPI.chrome.setTitleBar(refreshDate.date, '');
-    } else if (refreshDate?.date !== initialDate) window.location.reload();
-  }, [refreshDate]);
+  // const [now, setNow] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
 
   useEffect(() => {
     if (window.location.search.includes('code=')) loginSpotify(status?.docker);
@@ -46,45 +41,13 @@ export function App() {
     else setPlaybackUpdate(60 * 1000);
   }, [playbackState]);
 
-  useEffect(() => {
-    setTimeout(() => setClearScreen(true), 500);
-    setTimeout(() => setClearScreen(false), 1000);
-
-    setInterval(
-      () => {
-        setTimeout(() => setClearScreen(true), 500);
-        setTimeout(() => setClearScreen(false), 1000);
-      },
-      15 * 60 * 1000
-    );
-  }, []);
-
   if (loadingStatus || !status) return null;
-
   if (!status.google || !status.spotify) return <Login status={status} />;
 
   return (
     <div style={{ padding: '1rem', maxHeight: playbackState?.is_playing ? 600 : 760, overflowY: 'auto' }}>
-      {KINDLE && clearScreen && (
-        <div
-          style={{ width: '100%', height: 972, background: 'black', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
-        ></div>
-      )}
-
-      {process.env.DEV && (
-        <div
-          style={{
-            position: 'fixed',
-            top: '2.25rem',
-            right: '2.25rem',
-            padding: '1.25rem',
-            background: 'white',
-            lineHeight: '1rem',
-          }}
-        >
-          <input type="datetime-local" value={now} onChange={(e) => setNow(e.target.value)} />
-        </div>
-      )}
+      {clearScreenEl}
+      {/* <DebugTime now={now} setNow={setNow} /> */}
 
       <Days events={events} time={now} />
 

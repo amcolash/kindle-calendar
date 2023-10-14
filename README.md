@@ -1,6 +1,10 @@
 # kindle-calendar
 
-Small server to provider calendar image to hacked kindle
+A kindle dashboard to display upcoming events, currently playing music and the weather.
+
+This project was made possible by the [ReactJS Kindle WAF Template](https://github.com/ngxson/hobby-kindle-waf) from [ngxson](https://ngxson.com).
+
+![screenshot](./screenshot.png)
 
 ## Nano React App Default Javascript Template
 

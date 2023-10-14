@@ -1,7 +1,7 @@
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
 import { GoogleLoginButton } from 'react-social-login-buttons';
 
-import { PORT, SERVER, SPOTIFY_CLIENT_ID } from '../util/util';
+import { SERVER, SPOTIFY_CLIENT_ID } from '../util/util';
 
 export interface Status {
   google?: boolean;

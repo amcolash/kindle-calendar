@@ -22,13 +22,15 @@ export function EventCard({ event, now }: EventCardProps) {
         background: current ? '#ddd' : undefined,
         borderRadius: '0.5rem',
         marginBottom: '0.5rem',
-        marginLeft: current ? '-3px' : undefined
+        marginLeft: current ? '-3px' : undefined,
       }}
       key={event.id}
     >
-      <span style={{fontWeight: 600}}>{event.summary}</span>
+      <span style={{ fontWeight: 600 }}>{event.summary}</span>
 
-      <div style={{ marginTop: '0.25rem' }}>{allDay ? 'All Day' : `${start.format('h:mm A')} - ${end.format('h:mm A')}`}</div>
+      <div style={{ marginTop: '0.25rem' }}>
+        {allDay ? 'All Day' : `${start.format('h:mm A')} - ${end.format('h:mm A')}`}
+      </div>
     </div>
   );
 }
