@@ -30,14 +30,6 @@ export function NowPlaying({ playbackState, updatePlaybackState }: NowPlayingPro
   if (!playbackState)
     return (
       <div style={{ float: 'left' }}>
-        <button style={{ ...iconStyle, position: 'unset', marginRight: '0.25rem' }}>
-          <img
-            src={PlayIcon}
-            onClick={() => fetch(`${SERVER}/spotify/play`).then(() => delay(updatePlaybackState, 500))}
-            style={imgStyle}
-            alt="play"
-          />
-        </button>
         <span>Nothing is Playing</span>
       </div>
     );

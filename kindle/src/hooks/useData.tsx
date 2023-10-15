@@ -8,6 +8,10 @@ export function useData<T>(url: string, interval?: number) {
     setLoading(true);
     return fetch(url)
       .then((res) => res.json())
+      .catch((err) => {
+        console.error(err);
+        setData(undefined);
+      })
       .finally(() => setLoading(false));
   }
 
@@ -23,5 +27,9 @@ export function useData<T>(url: string, interval?: number) {
     }
   }, [interval, url]);
 
-  return { data, loading, forceUpdate: () => getData<T>(url).then((newData) => setData(newData)) };
+  return {
+    data,
+    loading,
+    forceUpdate: () => getData<T>(url).then((newData) => setData(newData)),
+  };
 }

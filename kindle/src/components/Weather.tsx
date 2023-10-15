@@ -38,23 +38,28 @@ export function Weather({ playbackState }: WeatherProps) {
     marginRight: playbackState ? '0.5rem' : '0.25rem',
     width: playbackState ? '1.5rem' : undefined,
     textAlign: 'center',
+    verticalAlign: 'middle',
+  };
+
+  const textStyle: React.CSSProperties = {
+    verticalAlign: 'middle',
   };
 
   return (
     <div style={{ float: 'right' }}>
       <div style={weatherStyle}>
         <i className={getIcon(weather.weather[0])} style={iconStyle} />
-        <span>{weather.main.feels_like.toFixed(0)}°F</span>
+        <span style={textStyle}>{weather.main.feels_like.toFixed(0)}°F</span>
       </div>
 
       <div style={weatherStyle}>
         <i className="wi wi-humidity" style={iconStyle} />
-        <span>{weather.main.humidity}%</span>
+        <span style={textStyle}>{weather.main.humidity}%</span>
       </div>
 
       <div style={weatherStyle}>
         <i className="wi wi-smog" style={iconStyle} />
-        <span>{aqi}</span>
+        <span style={textStyle}>{aqi}</span>
       </div>
     </div>
   );

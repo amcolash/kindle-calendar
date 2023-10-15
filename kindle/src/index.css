@@ -29,9 +29,7 @@ button {
   background: none;
 }
 
-button:active,
-button:focus,
-button:hover {
+button:active {
   background: #777 !important;
 }
 
