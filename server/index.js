@@ -155,6 +155,8 @@ app.get('/events', async (req, res) => {
     return;
   }
 
+  console.log('Getting events for', today.toISOString(), tomorrow.toISOString());
+
   try {
     for (const calendarId of CALENDARS) {
       const { data, status } = await google.calendar({ version: 'v3', auth: oauth2Client }).events.list({
