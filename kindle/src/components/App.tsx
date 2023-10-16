@@ -76,7 +76,7 @@ export function App() {
             error={playbackError !== undefined}
             updatePlaybackState={updatePlaybackState}
           />
-          <Weather playbackState={playbackState} />
+          <Weather isPlaying={playbackState?.is_playing || false} />
         </div>
 
         <div style={{ clear: 'both' }}></div>

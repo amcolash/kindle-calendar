@@ -150,6 +150,7 @@ app.get('/events', async (req, res) => {
   const allData = [];
 
   if (!GOOGLE_REFRESH_TOKEN) {
+    console.log('No google refresh token!');
     res.sendStatus(401);
     return;
   }
@@ -160,7 +161,7 @@ app.get('/events', async (req, res) => {
         calendarId,
         timeMin: today.toISOString(),
         timeMax: tomorrow.toISOString(),
-        singleEvents: true,
+        // singleEvents: true,
         orderBy: 'startTime',
         maxResults: 2500,
       });
@@ -168,6 +169,8 @@ app.get('/events', async (req, res) => {
       if (status === 200) allData.push(...(data.items || []));
     }
   } catch (err) {
+    console.error(err);
+
     if (err.response.status === 400) {
       GOOGLE_REFRESH_TOKEN = undefined;
       nconf.set('google_refresh_token', undefined);
@@ -175,11 +178,10 @@ app.get('/events', async (req, res) => {
         if (err) console.error(err);
       });
 
-      res.sendStatus(401);
+      res.sendStatus(400);
       return;
     }
 
-    console.error(err);
     res.sendStatus(500);
     return;
   }
