@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 
 export function useRerender(interval: number) {
-  const [_, rerender] = useState(0);
+  const [, rerender] = useState(0);
 
   useEffect(() => {
     // start refresh at the start of the next minute to ensure the delay starts at the start of the minute

@@ -1,4 +1,11 @@
-import { WeatherElement } from '../types';
+import React, { CSSProperties } from 'react';
+
+import { ReactComponent as Bike } from '../icons/bike.svg';
+import Gathertown from '../icons/gathertown.png';
+import { ReactComponent as Meet } from '../icons/meet.svg';
+import { ReactComponent as Slack } from '../icons/slack.svg';
+import { ReactComponent as Zoom } from '../icons/zoom.svg';
+import { GoogleEvent, WeatherElement } from '../types';
 
 export function getIcon(weather: WeatherElement): string {
   const icon = weather.icon;
@@ -190,3 +197,23 @@ const IconMapping: { [key: string]: string } = {
   'night-906': 'night-alt-hail',
   'night-957': 'strong-wind',
 };
+
+const iconStyle: CSSProperties = {
+  height: '1rem',
+  width: '1rem',
+  marginLeft: '0.35rem',
+  verticalAlign: 'middle',
+};
+
+export function getEventIcon(event: GoogleEvent): JSX.Element | null {
+  console.log(event);
+
+  const summary = (event.summary || '').toLowerCase();
+
+  if (summary.includes('gathertown')) return <img src={Gathertown} alt="gathertown" style={iconStyle} />;
+  if (summary.includes('standup')) return <Slack style={iconStyle} />;
+
+  if (event.hangoutLink) return <Meet style={iconStyle} />;
+
+  return null;
+}

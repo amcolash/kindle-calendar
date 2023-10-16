@@ -148,6 +148,11 @@ app.get('/events', async (req, res) => {
 
   const allData = [];
 
+  if (!GOOGLE_REFRESH_TOKEN) {
+    res.sendStatus(401);
+    return;
+  }
+
   try {
     for (const calendarId of CALENDARS) {
       const { data, status } = await google.calendar({ version: 'v3', auth: oauth2Client }).events.list({
@@ -162,6 +167,17 @@ app.get('/events', async (req, res) => {
       if (status === 200) allData.push(...(data.items || []));
     }
   } catch (err) {
+    if (err.response.status === 400) {
+      GOOGLE_REFRESH_TOKEN = undefined;
+      nconf.set('google_refresh_token', undefined);
+      nconf.save((err) => {
+        if (err) console.error(err);
+      });
+
+      res.sendStatus(401);
+      return;
+    }
+
     console.error(err);
     res.sendStatus(500);
     return;

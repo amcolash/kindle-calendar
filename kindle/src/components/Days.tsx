@@ -1,8 +1,8 @@
 import dayjs from 'dayjs';
 
-import { EventCard } from './EventCard';
 import { GoogleEvent } from '../types';
 import { sortEvents } from '../util/util';
+import { EventCard } from './EventCard';
 
 function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
   // Group events by day, and filter out events that have already ended
@@ -71,14 +71,14 @@ export function Days({ events, time }: DaysProps) {
       {dayList.map(({ day, dayEvents }) => (
         <div
           style={{
-            padding: '0.75rem',
+            padding: '0.75rem 1.25rem',
             borderRadius: '0.75rem',
             boxShadow: '0 0 0.5rem rgba(0, 0, 0, 0.35)',
             marginBottom: '1.5rem',
           }}
           key={day}
         >
-          <div style={{ fontSize: '1.3em', marginBottom: '0.5rem', marginLeft: '0.5rem' }}>{dayjs(day).format('dddd, MMM D')}</div>
+          <div style={{ fontSize: '1.3em', marginBottom: '0.5rem' }}>{dayjs(day).format('dddd, MMM D')}</div>
 
           {dayEvents.length === 0 && (
             <div style={{ color: 'grey', marginBottom: '0.5rem' }}>
