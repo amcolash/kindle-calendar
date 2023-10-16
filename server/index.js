@@ -38,7 +38,8 @@ if (SPOTIFY_ACCESS_TOKEN && !SPOTIFY_ACCESS_TOKEN.expires) SPOTIFY_ACCESS_TOKEN 
 const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',') : ['primary'];
 
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
-const clientUrl = IS_DOCKER ? `https://192.168.1.101:${PORT}` : `http://localhost:${3000}`;
+const googleRedirect = IS_DOCKER ? `https://home.amcolash.com:8501/oauth'` : `http://localhost:${PORT}/oauth`;
+const spotifyRedirect = `http://localhost:${3000}`;
 
 const {
   GOOGLE_CLIENT_ID,
@@ -199,17 +200,7 @@ app.get('/oauth', async (req, res) => {
       if (err) console.error(err);
     });
 
-    res.redirect(clientUrl);
-  } else if (req.query.logout) {
-    GOOGLE_REFRESH_TOKEN = undefined;
-    oauth2Client.setCredentials({});
-
-    nconf.set('google_refresh_token', undefined);
-    nconf.save((err) => {
-      if (err) console.error(err);
-    });
-
-    res.redirect(clientUrl);
+    res.redirect(googleRedirect);
   } else {
     // Generate a redirect url to authenticate user
 
@@ -225,7 +216,7 @@ app.get('/oauth', async (req, res) => {
 
 app.post('/spotify/oauth', (req, res) => {
   makeSpotifySdk(req.body);
-  res.redirect(clientUrl);
+  res.redirect(spotifyRedirect);
 });
 
 app.get('/spotify/now-playing', (req, res) => {

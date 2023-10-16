@@ -35,7 +35,7 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
       </div>
     );
 
-  if (!playbackState)
+  if (!playbackState || !playbackState.item)
     return (
       <div style={{ float: 'left' }}>
         <span>Nothing is Playing</span>
