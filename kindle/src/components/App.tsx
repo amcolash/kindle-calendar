@@ -20,13 +20,14 @@ export function App() {
   useRefresh(); // Refresh page when build changes on Kindle
 
   const { data: status, loading: loadingStatus } = useData<Status>(`${SERVER}/status`, 5 * 60 * 1000);
-  const { data: events } = useData<GoogleEvent[]>(`${SERVER}/events`, 5 * 60 * 1000);
+  const { data: events, error: eventError } = useData<GoogleEvent[]>(`${SERVER}/events`, 5 * 60 * 1000);
 
   const [playbackUpdate, setPlaybackUpdate] = useState(60 * 1000);
-  const { data: playbackState, forceUpdate: updatePlaybackState } = useData<PlaybackState>(
-    `${SERVER}/spotify/now-playing`,
-    playbackUpdate
-  );
+  const {
+    data: playbackState,
+    error: playbackError,
+    forceUpdate: updatePlaybackState,
+  } = useData<PlaybackState>(`${SERVER}/spotify/now-playing`, playbackUpdate);
 
   useRerender(60 * 1000); // Refresh page every minute, on the minute
   const now = dayjs().format('YYYY-MM-DDTHH:mm');
@@ -45,6 +46,8 @@ export function App() {
   if (loadingStatus || !status) return null;
   if (!status.google || !status.spotify) return <Login status={status} />;
 
+  console.log(eventError, playbackError);
+
   return (
     <div style={{ padding: '1rem', maxHeight: playbackState?.is_playing ? 600 : 760, overflowY: 'auto' }}>
       {clearScreenEl}
@@ -52,7 +55,7 @@ export function App() {
       <KindleButtons />
       {/* <DebugTime now={now} setNow={setNow} /> */}
 
-      <Days events={events} time={now} />
+      <Days events={events} time={now} error={eventError !== undefined} />
 
       <div
         style={{
@@ -68,7 +71,11 @@ export function App() {
         }}
       >
         <div>
-          <NowPlaying playbackState={playbackState} updatePlaybackState={updatePlaybackState} />
+          <NowPlaying
+            playbackState={playbackState}
+            error={playbackError !== undefined}
+            updatePlaybackState={updatePlaybackState}
+          />
           <Weather playbackState={playbackState} />
         </div>
 

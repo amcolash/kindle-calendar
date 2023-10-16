@@ -58,9 +58,12 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
 interface DaysProps {
   events?: GoogleEvent[];
   time: string;
+  error: boolean;
 }
 
-export function Days({ events, time }: DaysProps) {
+export function Days({ events, time, error }: DaysProps) {
+  if (error) return <span>Error Getting Events</span>;
+
   if (!events) return null;
 
   const now = dayjs(time);

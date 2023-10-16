@@ -8,6 +8,7 @@ import { KINDLE, SERVER, delay } from '../util/util';
 
 interface NowPlayingProps {
   playbackState?: PlaybackState;
+  error: boolean;
   updatePlaybackState: () => void;
 }
 
@@ -26,7 +27,14 @@ const imgStyle: React.CSSProperties = {
   opacity: 0.75,
 };
 
-export function NowPlaying({ playbackState, updatePlaybackState }: NowPlayingProps) {
+export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPlayingProps) {
+  if (error)
+    return (
+      <div style={{ float: 'left' }}>
+        <span>Error Getting Now Playing</span>
+      </div>
+    );
+
   if (!playbackState)
     return (
       <div style={{ float: 'left' }}>

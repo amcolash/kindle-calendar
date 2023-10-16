@@ -1,19 +1,26 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export function useData<T>(url: string, interval?: number) {
   const [data, setData] = useState<T>();
   const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState();
 
-  function getData<T>(url: string): Promise<T> {
-    setLoading(true);
-    return fetch(url)
-      .then((res) => res.json())
-      .catch((err) => {
-        console.error(err);
-        setData(undefined);
-      })
-      .finally(() => setLoading(false));
-  }
+  const getData = useCallback(
+    <T>(url: string): Promise<T> => {
+      setLoading(true);
+      setError(undefined);
+
+      return fetch(url)
+        .then((res) => res.json())
+        .catch((err) => {
+          console.error(err);
+          setData(undefined);
+          setError(err);
+        })
+        .finally(() => setLoading(false));
+    },
+    [setLoading, setError, setData]
+  );
 
   useEffect(() => {
     getData<T>(url).then((newData) => setData(newData));
@@ -25,11 +32,12 @@ export function useData<T>(url: string, interval?: number) {
 
       return () => clearInterval(i);
     }
-  }, [interval, url]);
+  }, [interval, url, getData]);
 
   return {
     data,
     loading,
+    error,
     forceUpdate: () => getData<T>(url).then((newData) => setData(newData)),
   };
 }

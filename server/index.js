@@ -237,7 +237,7 @@ app.get('/spotify/now-playing', (req, res) => {
         else currentDeviceId = undefined;
 
         // console.log(data);
-        res.send(data);
+        res.send(data || {});
 
         spotifySdk.getAccessToken().then((token) => {
           makeSpotifySdk(token);
