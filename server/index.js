@@ -14,6 +14,16 @@ const IS_DOCKER = existsSync('/.dockerenv');
 
 require('dotenv').config();
 
+const {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REDIRECT_URL,
+  SPOTIFY_CLIENT_ID,
+  OPEN_WEATHER_KEY,
+  HOME_ASSISTANT_URL,
+  HOME_ASSISTANT_KEY,
+} = process.env;
+
 try {
   nconf.use('file', { file: './settings.json' });
   nconf.defaults({
@@ -38,20 +48,10 @@ if (SPOTIFY_ACCESS_TOKEN && !SPOTIFY_ACCESS_TOKEN.expires) SPOTIFY_ACCESS_TOKEN 
 const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',') : ['primary'];
 
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
-const googleRedirect = IS_DOCKER ? `https://home.amcolash.com:8501/oauth'` : `http://localhost:${PORT}/oauth`;
-const spotifyRedirect = `http://localhost:${3000}`;
+const googleRedirect = IS_DOCKER && GOOGLE_REDIRECT_URL ? GOOGLE_REDIRECT_URL : `https://localhost:${PORT}/oauth`;
+const clientUrl = `http://localhost:${3000}`;
 
-const {
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  REDIRECT_URL,
-  SPOTIFY_CLIENT_ID,
-  OPEN_WEATHER_KEY,
-  HOME_ASSISTANT_URL,
-  HOME_ASSISTANT_KEY,
-} = process.env;
-
-const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, REDIRECT_URL);
+const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, googleRedirect);
 
 let spotifySdk;
 let currentDeviceId;
@@ -83,7 +83,7 @@ const server2 = require('http').createServer(app);
 
 if (!GOOGLE_CLIENT_ID) console.error('Missing env var: GOOGLE_CLIENT_ID');
 if (!GOOGLE_CLIENT_SECRET) console.error('Missing env var: GOOGLE_CLIENT_SECRET');
-if (!REDIRECT_URL) console.error('Missing env var: REDIRECT_URL');
+if (!GOOGLE_REDIRECT_URL) console.error('Missing env var: GOOGLE_REDIRECT_URL');
 if (!SPOTIFY_CLIENT_ID) console.error('Missing env var: SPOTIFY_CLIENT_ID');
 if (!OPEN_WEATHER_KEY) console.error('Missing env var: OPEN_WEATHER_KEY');
 if (!HOME_ASSISTANT_URL) console.error('Missing env var: HOME_ASSISTANT_URL');
@@ -92,7 +92,7 @@ if (!HOME_ASSISTANT_KEY) console.error('Missing env var: HOME_ASSISTANT_KEY');
 if (
   !GOOGLE_CLIENT_ID ||
   !GOOGLE_CLIENT_SECRET ||
-  !REDIRECT_URL ||
+  !GOOGLE_REDIRECT_URL ||
   !SPOTIFY_CLIENT_ID ||
   !OPEN_WEATHER_KEY ||
   !HOME_ASSISTANT_URL ||
@@ -200,7 +200,7 @@ app.get('/oauth', async (req, res) => {
       if (err) console.error(err);
     });
 
-    res.redirect(googleRedirect);
+    res.redirect(clientUrl);
   } else {
     // Generate a redirect url to authenticate user
 
@@ -216,7 +216,7 @@ app.get('/oauth', async (req, res) => {
 
 app.post('/spotify/oauth', (req, res) => {
   makeSpotifySdk(req.body);
-  res.redirect(spotifyRedirect);
+  res.redirect(clientUrl);
 });
 
 app.get('/spotify/now-playing', (req, res) => {
