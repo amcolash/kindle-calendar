@@ -161,8 +161,8 @@ app.get('/events', async (req, res) => {
         calendarId,
         timeMin: today.toISOString(),
         timeMax: tomorrow.toISOString(),
-        // singleEvents: true,
-        orderBy: 'startTime',
+        singleEvents: true,
+        // orderBy: 'startTime',
         maxResults: 2500,
       });
 
@@ -171,14 +171,14 @@ app.get('/events', async (req, res) => {
   } catch (err) {
     console.error(err);
 
-    if (err.response.status === 400) {
+    if (err.response.status === 401) {
       GOOGLE_REFRESH_TOKEN = undefined;
       nconf.set('google_refresh_token', undefined);
       nconf.save((err) => {
         if (err) console.error(err);
       });
 
-      res.sendStatus(400);
+      res.sendStatus(401);
       return;
     }
 
