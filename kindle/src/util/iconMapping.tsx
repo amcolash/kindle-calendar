@@ -202,6 +202,7 @@ const iconStyle: CSSProperties = {
   height: '1rem',
   width: '1rem',
   marginLeft: '0.35rem',
+  marginTop: '-0.1rem',
   verticalAlign: 'middle',
 };
 
@@ -212,6 +213,7 @@ export function getEventIcon(event: GoogleEvent): JSX.Element | null {
 
   if (summary.includes('gathertown')) return <img src={Gathertown} alt="gathertown" style={iconStyle} />;
   if (summary.includes('standup')) return <Slack style={iconStyle} />;
+  if (event.conferenceData?.conferenceSolution?.name?.toLowerCase().includes('zoom')) return <Zoom style={iconStyle} />;
 
   if (event.hangoutLink) return <Meet style={iconStyle} />;
 

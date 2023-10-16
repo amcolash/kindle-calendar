@@ -1,6 +1,6 @@
 import { GoogleEvent } from '../types';
 
-export const DEBUG = true;
+export const DEBUG = false;
 export const LOCAL_SERVER = false;
 
 export const PORT = 8501;

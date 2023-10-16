@@ -21,12 +21,11 @@ export function EventCard({ event, now }: EventCardProps) {
     <div
       style={{
         padding: '0.5rem',
-        paddingLeft: 0,
-        border: current ? '3px solid grey' : undefined,
+        border: current ? '0.15rem solid grey' : undefined,
         background: current ? '#ddd' : undefined,
         borderRadius: '0.5rem',
         marginBottom: '0.5rem',
-        marginLeft: current ? '-3px' : undefined,
+        margin: current ? '0 -0.65rem' : '0 -0.5rem',
       }}
       key={event.id}
     >
