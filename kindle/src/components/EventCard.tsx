@@ -1,4 +1,5 @@
 import dayjs from 'dayjs';
+import Twemoji from 'react-twemoji';
 
 import { GoogleEvent } from '../types';
 import { getEventIcon } from '../util/iconMapping';
@@ -29,7 +30,10 @@ export function EventCard({ event, now }: EventCardProps) {
       }}
       key={event.id}
     >
-      <span style={{ fontWeight: 600 }}>{event.summary}</span>
+      <Twemoji tag="span">
+        <span style={{ fontWeight: 600 }}>{event.summary}</span>
+      </Twemoji>
+
       {icon}
 
       <div style={{ marginTop: '0.25rem' }}>
