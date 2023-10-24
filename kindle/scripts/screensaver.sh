@@ -18,3 +18,8 @@ intensity=$(cat /sys/class/backlight/max77696-bl/brightness | grep -e '[0-9]');
 if [ "$intensity" = "1" ]; then
   echo -n 0 > /sys/class/backlight/max77696-bl/brightness;
 fi
+
+# Keep track of battery level over time
+BATTERY=$(lipc-get-prop com.lab126.powerd battLevel)
+TIME=$(date +%s)
+echo "$TIME, $BATTERY" >> /mnt/us/battery.log

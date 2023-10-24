@@ -155,8 +155,6 @@ app.get('/events', async (req, res) => {
     return;
   }
 
-  console.log('Getting events for', today.toISOString(), tomorrow.toISOString());
-
   try {
     for (const calendarId of CALENDARS) {
       const { data, status } = await google.calendar({ version: 'v3', auth: oauth2Client }).events.list({
@@ -173,7 +171,7 @@ app.get('/events', async (req, res) => {
   } catch (err) {
     console.error(err);
 
-    if (err.response.status === 401) {
+    if (err.response.status === 401 || (err.response.status === 400 && err.response.data?.error === 'invalid_grant')) {
       GOOGLE_REFRESH_TOKEN = undefined;
       nconf.set('google_refresh_token', undefined);
       nconf.save((err) => {
