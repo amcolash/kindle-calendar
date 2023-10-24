@@ -1,12 +1,12 @@
 import { useState } from 'react';
 
+import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { KINDLE } from '../util/util';
 import { KindleAPI } from './Kindle';
 
 export function KindleButtons() {
   const [showButtons, setShowButtons] = useState(false);
-
-  if (!KINDLE) return null;
+  const { rotation, setRotation } = useRotationContext();
 
   return (
     <div
@@ -35,7 +35,15 @@ export function KindleButtons() {
           </button>
           <button
             style={{ display: 'block', width: '100%', textAlign: 'center', marginBottom: '0.45rem' }}
-            onClick={() => KindleAPI.appmgr.back()}
+            onClick={() => setRotation(rotation === Rotation.Portrait ? Rotation.Landscape : Rotation.Portrait)}
+          >
+            Rotate ({rotation})
+          </button>
+          <button
+            style={{ display: 'block', width: '100%', textAlign: 'center', marginBottom: '0.45rem' }}
+            onClick={() => {
+              if (KINDLE) KindleAPI.appmgr.back();
+            }}
           >
             Exit
           </button>
