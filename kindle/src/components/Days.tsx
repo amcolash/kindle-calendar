@@ -1,5 +1,6 @@
 import dayjs from 'dayjs';
 
+import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { GoogleEvent } from '../types';
 import { sortEvents } from '../util/util';
 import { EventCard } from './EventCard';
@@ -62,6 +63,8 @@ interface DaysProps {
 }
 
 export function Days({ events, time, error }: DaysProps) {
+  const { rotation } = useRotationContext();
+
   if (error) return <span>Error Getting Events</span>;
 
   if (!events) return null;
@@ -70,7 +73,7 @@ export function Days({ events, time, error }: DaysProps) {
   const dayList = parseEvents(events, now);
 
   return (
-    <>
+    <div style={{ width: rotation === Rotation.Portrait ? undefined : '55%' }}>
       {dayList.map(({ day, dayEvents }) => (
         <div
           style={{
@@ -94,6 +97,6 @@ export function Days({ events, time, error }: DaysProps) {
           ))}
         </div>
       ))}
-    </>
+    </div>
   );
 }

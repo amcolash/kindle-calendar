@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import 'weather-icons/css/weather-icons.min.css';
 
+import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { Weather as WeatherType } from '../types';
 import { getIcon } from '../util/iconMapping';
 import { SERVER } from '../util/util';
@@ -9,9 +10,12 @@ interface WeatherProps {
   isPlaying: boolean;
 }
 
-export function Weather({ isPlaying }: WeatherProps) {
+export function Weather(props: WeatherProps) {
+  const { rotation } = useRotationContext();
   const [weather, setWeather] = useState<WeatherType>();
   const [aqi, setAqi] = useState<number>();
+
+  const isPlaying = props.isPlaying !== undefined && rotation === Rotation.Portrait;
 
   useEffect(() => {
     fetch(`${SERVER}/weather`)
@@ -45,7 +49,9 @@ export function Weather({ isPlaying }: WeatherProps) {
   };
 
   return (
-    <div style={{ float: 'right' }}>
+    <div style={{ float: rotation === Rotation.Portrait ? 'right' : undefined }}>
+      {rotation === Rotation.Landscape && <div style={{ margin: '0.75rem 0', borderBottom: '1px solid #999' }}></div>}
+
       <div style={weatherStyle}>
         <i className={getIcon(weather.weather[0])} style={iconStyle} />
         <span style={textStyle}>{weather.main.feels_like.toFixed(0)}°F</span>

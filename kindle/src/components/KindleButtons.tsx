@@ -16,6 +16,7 @@ export function KindleButtons() {
         left: 0,
         width: '100%',
         height: rotation === Rotation.Portrait ? 450 : 250,
+        zIndex: 1,
       }}
       onClick={(e) => {
         setShowButtons(!showButtons);

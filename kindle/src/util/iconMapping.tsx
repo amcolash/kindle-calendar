@@ -211,6 +211,8 @@ export function getEventIcon(event: GoogleEvent): JSX.Element | null {
 
   const summary = (event.summary || '').toLowerCase();
 
+  if (summary.includes('chiro') || summary.includes('massage')) return <Bike style={iconStyle} />;
+
   if (summary.includes('gathertown')) return <img src={Gathertown} alt="gathertown" style={iconStyle} />;
   if (summary.includes('standup')) return <Slack style={iconStyle} />;
   if (event.conferenceData?.conferenceSolution?.name?.toLowerCase().includes('zoom')) return <Zoom style={iconStyle} />;

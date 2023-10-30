@@ -49,7 +49,6 @@ export function App() {
   let containerHeight;
   const playbarOffset = playbackState?.is_playing ? 372 : 212;
   if (rotation === Rotation.Portrait) containerHeight = HEIGHT - playbarOffset;
-  else containerHeight = WIDTH - playbarOffset;
 
   return (
     <div style={{ padding: '1rem', maxHeight: containerHeight, overflowY: 'auto' }}>

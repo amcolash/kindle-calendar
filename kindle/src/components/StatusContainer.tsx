@@ -23,6 +23,17 @@ export function StatusContainer({
 }: StatusContainerProps) {
   const { rotation } = useRotationContext();
 
+  const MusicWeather = () => (
+    <>
+      <NowPlaying
+        playbackState={playbackState}
+        error={playbackError !== undefined}
+        updatePlaybackState={updatePlaybackState}
+      />
+      <Weather isPlaying={playbackState?.is_playing || false} />
+    </>
+  );
+
   return (
     <div
       style={{
@@ -36,18 +47,20 @@ export function StatusContainer({
         boxSizing: 'border-box',
         boxShadow: '0 0 1rem rgba(0, 0, 0, 0.35), 0 -2rem 3rem rgba(255, 255, 255, 1)',
         background: 'white',
+        display: 'table',
       }}
     >
-      <div>
-        <NowPlaying
-          playbackState={playbackState}
-          error={playbackError !== undefined}
-          updatePlaybackState={updatePlaybackState}
-        />
-        <Weather isPlaying={playbackState?.is_playing || false} />
-      </div>
+      {rotation === Rotation.Portrait ? (
+        <>
+          <div>
+            <MusicWeather />
+          </div>
 
-      <div style={{ clear: 'both' }}></div>
+          <div style={{ clear: 'both' }}></div>
+        </>
+      ) : (
+        <MusicWeather />
+      )}
 
       <UpcomingEvent events={events} time={now} />
     </div>
