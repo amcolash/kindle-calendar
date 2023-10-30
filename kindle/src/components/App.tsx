@@ -12,9 +12,7 @@ import { HEIGHT, SERVER, WIDTH } from '../util/util';
 import { Days } from './Days';
 import { KindleButtons } from './KindleButtons';
 import { Login, Status, loginSpotify } from './Login';
-import { UpcomingEvent } from './NextEvent';
-import { NowPlaying } from './NowPlaying';
-import { Weather } from './Weather';
+import { StatusContainer } from './StatusContainer';
 
 export function App() {
   const { clearScreenEl } = useClearScreen(); // Clear screen every 15 minutes
@@ -62,32 +60,13 @@ export function App() {
 
       <Days events={events} time={now} error={eventError !== undefined} />
 
-      <div
-        style={{
-          position: 'absolute',
-          bottom: 0,
-          left: 0,
-          padding: '1rem',
-          paddingBottom: '0.75rem',
-          width: '100%',
-          boxSizing: 'border-box',
-          boxShadow: '0 0 1rem rgba(0, 0, 0, 0.35), 0 -2rem 3rem rgba(255, 255, 255, 1)',
-          background: 'white',
-        }}
-      >
-        <div>
-          <NowPlaying
-            playbackState={playbackState}
-            error={playbackError !== undefined}
-            updatePlaybackState={updatePlaybackState}
-          />
-          <Weather isPlaying={playbackState?.is_playing || false} />
-        </div>
-
-        <div style={{ clear: 'both' }}></div>
-
-        <UpcomingEvent events={events} time={now} />
-      </div>
+      <StatusContainer
+        playbackState={playbackState}
+        playbackError={playbackError}
+        updatePlaybackState={updatePlaybackState}
+        events={events}
+        now={now}
+      />
     </div>
   );
 }

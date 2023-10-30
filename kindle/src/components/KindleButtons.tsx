@@ -10,7 +10,13 @@ export function KindleButtons() {
 
   return (
     <div
-      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: 450 }}
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: rotation === Rotation.Portrait ? 450 : 250,
+      }}
       onClick={(e) => {
         setShowButtons(!showButtons);
         e.stopPropagation();
