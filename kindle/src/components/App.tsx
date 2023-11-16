@@ -5,10 +5,9 @@ import { useEffect, useState } from 'react';
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { useClearScreen } from '../hooks/useClearScreen';
 import { useData } from '../hooks/useData';
-import { useRefresh } from '../hooks/useRefresh';
 import { useRerender } from '../hooks/useRerender';
-import { GoogleEvent } from '../types';
-import { HEIGHT, SERVER, WIDTH } from '../util/util';
+import { AQI, GoogleEvent, Weather } from '../types';
+import { HEIGHT, SERVER } from '../util/util';
 import { Days } from './Days';
 import { KindleButtons } from './KindleButtons';
 import { Login, Status, loginSpotify } from './Login';
@@ -16,11 +15,12 @@ import { StatusContainer } from './StatusContainer';
 
 export function App() {
   const { clearScreenEl } = useClearScreen(); // Clear screen every 15 minutes
-  useRefresh(); // Refresh page when build changes on Kindle
   const { rotation } = useRotationContext();
 
   const { data: status, loading: loadingStatus } = useData<Status>(`${SERVER}/status`, 5 * 60 * 1000);
   const { data: events, error: eventError } = useData<GoogleEvent[]>(`${SERVER}/events`, 5 * 60 * 1000);
+  const { data: weather } = useData<Weather>(`${SERVER}/weather`, 5 * 60 * 1000);
+  const { data: aqi } = useData<AQI>(`${SERVER}/aqi`, 5 * 60 * 1000);
 
   const [playbackUpdate, setPlaybackUpdate] = useState(60 * 1000);
   const {
@@ -43,7 +43,7 @@ export function App() {
     else setPlaybackUpdate(60 * 1000);
   }, [playbackState]);
 
-  if (loadingStatus || !status) return null;
+  if (loadingStatus || !status || !weather || !aqi) return null;
   if (!status.google || !status.spotify) return <Login status={status} />;
 
   let containerHeight;
@@ -51,21 +51,32 @@ export function App() {
   if (rotation === Rotation.Portrait) containerHeight = HEIGHT - playbarOffset;
 
   return (
-    <div style={{ padding: '1rem', maxHeight: containerHeight, overflowY: 'auto' }}>
+    <>
+      <div
+        style={{
+          padding: '1rem',
+          maxHeight: containerHeight,
+          overflowY: 'auto',
+          // transform: rotation === Rotation.Portrait ? undefined : 'rotate(90deg)',
+          // WebkitTransform: rotation === Rotation.Portrait ? undefined : 'rotate(90deg)',
+        }}
+      >
+        <KindleButtons />
+        {/* <DebugTime now={now} setNow={setNow} /> */}
+
+        <Days events={events} time={now} error={eventError !== undefined} />
+      </div>
+
       {clearScreenEl}
-
-      <KindleButtons />
-      {/* <DebugTime now={now} setNow={setNow} /> */}
-
-      <Days events={events} time={now} error={eventError !== undefined} />
-
       <StatusContainer
         playbackState={playbackState}
         playbackError={playbackError}
         updatePlaybackState={updatePlaybackState}
         events={events}
         now={now}
+        weather={weather}
+        aqi={aqi}
       />
-    </div>
+    </>
   );
 }

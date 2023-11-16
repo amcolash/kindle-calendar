@@ -1,7 +1,8 @@
 import { PlaybackState } from '@spotify/web-api-ts-sdk';
+import { useCallback } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
-import { GoogleEvent } from '../types';
+import { AQI, GoogleEvent, Weather as WeatherType } from '../types';
 import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';
@@ -12,6 +13,8 @@ interface StatusContainerProps {
   updatePlaybackState: () => void;
   events?: GoogleEvent[];
   now: string;
+  weather: WeatherType;
+  aqi: AQI;
 }
 
 export function StatusContainer({
@@ -20,18 +23,23 @@ export function StatusContainer({
   updatePlaybackState,
   events,
   now,
+  weather,
+  aqi,
 }: StatusContainerProps) {
   const { rotation } = useRotationContext();
 
-  const MusicWeather = () => (
-    <>
-      <NowPlaying
-        playbackState={playbackState}
-        error={playbackError !== undefined}
-        updatePlaybackState={updatePlaybackState}
-      />
-      <Weather isPlaying={playbackState?.is_playing || false} />
-    </>
+  const MusicWeather = useCallback(
+    ({ weather, aqi }: { weather: WeatherType; aqi: AQI }) => (
+      <div style={{ overflow: 'auto' }}>
+        <NowPlaying
+          playbackState={playbackState}
+          error={playbackError !== undefined}
+          updatePlaybackState={updatePlaybackState}
+        />
+        <Weather isPlaying={playbackState?.is_playing} weather={weather} aqi={aqi} />
+      </div>
+    ),
+    [playbackState, playbackError, updatePlaybackState]
   );
 
   return (
@@ -43,25 +51,14 @@ export function StatusContainer({
         padding: '1rem',
         paddingBottom: '0.75rem',
         width: rotation === Rotation.Portrait ? '100%' : '40%',
-        height: rotation === Rotation.Portrait ? 'auto' : '100%',
+        height: rotation === Rotation.Portrait ? undefined : '100%',
         boxSizing: 'border-box',
         boxShadow: '0 0 1rem rgba(0, 0, 0, 0.35), 0 -2rem 3rem rgba(255, 255, 255, 1)',
         background: 'white',
-        display: 'table',
+        // display: 'table',
       }}
     >
-      {rotation === Rotation.Portrait ? (
-        <>
-          <div>
-            <MusicWeather />
-          </div>
-
-          <div style={{ clear: 'both' }}></div>
-        </>
-      ) : (
-        <MusicWeather />
-      )}
-
+      <MusicWeather weather={weather} aqi={aqi} />
       <UpcomingEvent events={events} time={now} />
     </div>
   );

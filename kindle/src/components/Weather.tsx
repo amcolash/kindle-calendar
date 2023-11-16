@@ -1,33 +1,20 @@
-import { useEffect, useState } from 'react';
 import 'weather-icons/css/weather-icons.min.css';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
-import { Weather as WeatherType } from '../types';
+import { AQI, Weather as WeatherType } from '../types';
 import { getIcon } from '../util/iconMapping';
-import { SERVER } from '../util/util';
 
 interface WeatherProps {
-  isPlaying: boolean;
+  isPlaying?: boolean;
+  weather?: WeatherType;
+  aqi?: AQI;
 }
 
-export function Weather(props: WeatherProps) {
+export function Weather({ isPlaying: playing, weather, aqi }: WeatherProps) {
   const { rotation } = useRotationContext();
-  const [weather, setWeather] = useState<WeatherType>();
-  const [aqi, setAqi] = useState<number>();
+  const isPlaying = playing && rotation === Rotation.Portrait;
 
-  const isPlaying = props.isPlaying !== undefined && rotation === Rotation.Portrait;
-
-  useEffect(() => {
-    fetch(`${SERVER}/weather`)
-      .then((res) => res.json())
-      .then((res) => setWeather(res));
-
-    fetch(`${SERVER}/aqi`)
-      .then((res) => res.json())
-      .then((res) => setAqi(res.state));
-  }, []);
-
-  if (!weather) return null;
+  if (!weather || !aqi) return null;
 
   const weatherStyle: React.CSSProperties = {
     display: isPlaying ? undefined : 'inline-block',
@@ -64,7 +51,7 @@ export function Weather(props: WeatherProps) {
 
       <div style={weatherStyle}>
         <i className="wi wi-smog" style={iconStyle} />
-        <span style={textStyle}>{aqi}</span>
+        <span style={textStyle}>{aqi.state}</span>
       </div>
     </div>
   );

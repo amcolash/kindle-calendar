@@ -207,8 +207,6 @@ const iconStyle: CSSProperties = {
 };
 
 export function getEventIcon(event: GoogleEvent): JSX.Element | null {
-  console.log(event);
-
   const summary = (event.summary || '').toLowerCase();
 
   if (summary.includes('chiro') || summary.includes('massage')) return <Bike style={iconStyle} />;
