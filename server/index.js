@@ -3,21 +3,20 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const { CronJob } = require('cron');
 const Cronofy = require('cronofy');
-const dayjs = require('dayjs');
-const timezone = require('dayjs/plugin/timezone');
-const utc = require('dayjs/plugin/utc');
 const express = require('express');
 const { existsSync, readFileSync } = require('fs');
 const { createServer } = require('http');
 const { createServer: createServerHttps } = require('https');
 const nconf = require('nconf');
 const fetch = require('node-fetch');
+const { DateTime, Settings } = require('luxon');
 
 const IS_DOCKER = existsSync('/.dockerenv');
 
 require('dotenv').config();
 
 const TIMEZONE = 'America/Los_Angeles';
+Settings.defaultZone = TIMEZONE;
 
 const {
   SPOTIFY_CLIENT_ID,
@@ -40,10 +39,6 @@ try {
 } catch (err) {
   console.error(err);
 }
-
-dayjs.extend(utc);
-dayjs.extend(timezone);
-dayjs.tz.setDefault(TIMEZONE);
 
 let SPOTIFY_ACCESS_TOKEN = nconf.get('spotify_access_token');
 if (SPOTIFY_ACCESS_TOKEN && !SPOTIFY_ACCESS_TOKEN.expires) SPOTIFY_ACCESS_TOKEN = undefined;
@@ -119,9 +114,10 @@ new CronJob(
   function () {
     refreshCronofyToken();
 
-    spotifySdk.getAccessToken().then((token) => {
-      makeSpotifySdk(token);
-    });
+    if (spotifySdk)
+      spotifySdk.getAccessToken().then((token) => {
+        makeSpotifySdk(token);
+      });
   },
   null,
   true,
@@ -148,11 +144,11 @@ app.get('/status', (req, res) => {
 });
 
 app.get('/events', async (req, res) => {
-  const today = dayjs().startOf('day');
-  const tomorrow = today.add(1, 'day').endOf('day');
+  const today = DateTime.now().setZone(TIMEZONE).startOf('day');
+  const tomorrow = today.plus({ days: 1 }).endOf('day');
 
   cronofyClient
-    .readEvents({ from: today.toISOString(), to: tomorrow.toISOString(), tzid: TIMEZONE })
+    .readEvents({ from: today.toISO(), to: tomorrow.toISO(), tzid: TIMEZONE })
     .then((data) => {
       const filtered = data.events.filter((e) => e.participation_status !== 'declined');
       res.send(filtered);
