@@ -14,7 +14,7 @@ export function setupDayJs() {
   dayjs.extend(relativeTime);
   dayjs.extend(duration);
 
-  dayjs.tz.setDefault('America/Pacific');
+  dayjs.tz.setDefault('America/Los_Angeles');
 
   // @ts-ignore
   window.dayjs = dayjs;

@@ -1,34 +1,39 @@
-const cors = require('cors');
-const express = require('express');
-const { google } = require('googleapis');
-const bodyParser = require('body-parser');
-const nconf = require('nconf');
-const { existsSync, readFileSync } = require('fs');
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-const timezone = require('dayjs/plugin/timezone');
 const { SpotifyApi } = require('@spotify/web-api-ts-sdk');
-const { default: fetch } = require('node-fetch');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { CronJob } = require('cron');
+const Cronofy = require('cronofy');
+const dayjs = require('dayjs');
+const timezone = require('dayjs/plugin/timezone');
+const utc = require('dayjs/plugin/utc');
+const express = require('express');
+const { existsSync, readFileSync } = require('fs');
+const { createServer } = require('http');
+const { createServer: createServerHttps } = require('https');
+const nconf = require('nconf');
+const fetch = require('node-fetch');
 
 const IS_DOCKER = existsSync('/.dockerenv');
 
 require('dotenv').config();
 
+const TIMEZONE = 'America/Los_Angeles';
+
 const {
-  GOOGLE_CLIENT_ID,
-  GOOGLE_CLIENT_SECRET,
-  GOOGLE_REDIRECT_URL,
   SPOTIFY_CLIENT_ID,
   OPEN_WEATHER_KEY,
   HOME_ASSISTANT_URL,
   HOME_ASSISTANT_KEY,
+  CRONOFY_CLIENT_ID,
+  CRONOFY_CLIENT_SECRET,
+  CRONOFY_CLIENT_REFRESH_TOKEN,
 } = process.env;
 
 try {
   nconf.use('file', { file: './settings.json' });
   nconf.defaults({
-    google_refresh_token: undefined,
     spotify_access_token: undefined,
+    cronofy_access_token: undefined,
   });
 
   nconf.load();
@@ -38,21 +43,15 @@ try {
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
-dayjs.tz.setDefault('America/Pacific');
+dayjs.tz.setDefault(TIMEZONE);
 
-let GOOGLE_REFRESH_TOKEN = nconf.get('google_refresh_token');
 let SPOTIFY_ACCESS_TOKEN = nconf.get('spotify_access_token');
-
 if (SPOTIFY_ACCESS_TOKEN && !SPOTIFY_ACCESS_TOKEN.expires) SPOTIFY_ACCESS_TOKEN = undefined;
 
-const CALENDARS = process.env.CALENDAR_IDS ? process.env.CALENDAR_IDS.split(',') : ['primary'];
-
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
-const googleRedirect = IS_DOCKER && GOOGLE_REDIRECT_URL ? GOOGLE_REDIRECT_URL : `https://localhost:${PORT}/oauth`;
 const clientUrl = `http://localhost:${3000}`;
 
-const oauth2Client = new google.auth.OAuth2(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, googleRedirect);
-
+let cronofyClient;
 let spotifySdk;
 let currentDeviceId;
 
@@ -78,35 +77,31 @@ if (!credentials.cert) throw 'Missing cert for https server';
 const app = express();
 app.use(bodyParser.json());
 
-const server = require('https').createServer(credentials, app);
-const server2 = require('http').createServer(app);
+const server = createServerHttps(credentials, app);
+const server2 = createServer(app);
 
-if (!GOOGLE_CLIENT_ID) console.error('Missing env var: GOOGLE_CLIENT_ID');
-if (!GOOGLE_CLIENT_SECRET) console.error('Missing env var: GOOGLE_CLIENT_SECRET');
-if (!GOOGLE_REDIRECT_URL) console.error('Missing env var: GOOGLE_REDIRECT_URL');
 if (!SPOTIFY_CLIENT_ID) console.error('Missing env var: SPOTIFY_CLIENT_ID');
 if (!OPEN_WEATHER_KEY) console.error('Missing env var: OPEN_WEATHER_KEY');
 if (!HOME_ASSISTANT_URL) console.error('Missing env var: HOME_ASSISTANT_URL');
 if (!HOME_ASSISTANT_KEY) console.error('Missing env var: HOME_ASSISTANT_KEY');
+if (!CRONOFY_CLIENT_ID) console.error('Missing env var: CRONOFY_CLIENT_ID');
+if (!CRONOFY_CLIENT_SECRET) console.error('Missing env var: CRONOFY_CLIENT_SECRET');
+if (!CRONOFY_CLIENT_REFRESH_TOKEN) console.error('Missing env var: CRONOFY_CLIENT_REFRESH_TOKEN');
 
-if (
-  !GOOGLE_CLIENT_ID ||
-  !GOOGLE_CLIENT_SECRET ||
-  !GOOGLE_REDIRECT_URL ||
-  !SPOTIFY_CLIENT_ID ||
-  !OPEN_WEATHER_KEY ||
-  !HOME_ASSISTANT_URL ||
-  !HOME_ASSISTANT_KEY
-)
-  process.exit(1);
+if (!SPOTIFY_CLIENT_ID || !OPEN_WEATHER_KEY || !HOME_ASSISTANT_URL || !HOME_ASSISTANT_KEY) process.exit(1);
 
-if (GOOGLE_REFRESH_TOKEN) {
-  oauth2Client.setCredentials({
-    refresh_token: GOOGLE_REFRESH_TOKEN,
+// Set up access/refresh tokens
+if (CRONOFY_CLIENT_ID && CRONOFY_CLIENT_SECRET && CRONOFY_CLIENT_REFRESH_TOKEN) {
+  cronofyClient = new Cronofy({
+    client_id: CRONOFY_CLIENT_ID,
+    client_secret: CRONOFY_CLIENT_SECRET,
+    refresh_token: CRONOFY_CLIENT_REFRESH_TOKEN,
   });
+
+  refreshCronofyToken();
 } else {
   console.error(
-    `No google refresh token found, you must authenticate at http://localhost:${PORT}/oauth before using calendar endpoints`
+    `No cronofy client id or secret found, you must set CRONOFY_CLIENT_ID and CRONOFY_CLIENT_SECRET env vars before using calendar endpoints`
   );
 }
 
@@ -117,6 +112,21 @@ if (SPOTIFY_ACCESS_TOKEN) {
     `No spotify access token found, you must authenticate at http://localhost:${PORT}/spotify-oauth before using spotify endpoints`
   );
 }
+
+// Refresh tokens every hour
+new CronJob(
+  '0 * * * *',
+  function () {
+    refreshCronofyToken();
+
+    spotifySdk.getAccessToken().then((token) => {
+      makeSpotifySdk(token);
+    });
+  },
+  null,
+  true,
+  TIMEZONE
+);
 
 app.use(cors());
 app.use(express.json());
@@ -131,89 +141,23 @@ server2.listen(PORT + 1, '0.0.0.0', () => {
 
 app.get('/status', (req, res) => {
   res.send({
-    google: GOOGLE_REFRESH_TOKEN !== undefined,
+    cronofy: CRONOFY_CLIENT_REFRESH_TOKEN !== undefined,
     spotify: SPOTIFY_ACCESS_TOKEN !== undefined,
     docker: IS_DOCKER,
   });
-});
-
-app.get('/calendars', async (req, res) => {
-  const { data } = await google.calendar({ version: 'v3', auth: oauth2Client }).calendarList.list();
-
-  res.send(data);
 });
 
 app.get('/events', async (req, res) => {
   const today = dayjs().startOf('day');
   const tomorrow = today.add(1, 'day').endOf('day');
 
-  const allData = [];
-
-  if (!GOOGLE_REFRESH_TOKEN) {
-    console.log('No google refresh token!');
-    res.sendStatus(401);
-    return;
-  }
-
-  try {
-    for (const calendarId of CALENDARS) {
-      const { data, status } = await google.calendar({ version: 'v3', auth: oauth2Client }).events.list({
-        calendarId,
-        timeMin: today.toISOString(),
-        timeMax: tomorrow.toISOString(),
-        singleEvents: true,
-        // orderBy: 'startTime',
-        maxResults: 2500,
-      });
-
-      if (status === 200) allData.push(...(data.items || []));
-    }
-  } catch (err) {
-    console.error(err);
-
-    if (err.response.status === 401 || (err.response.status === 400 && err.response.data?.error === 'invalid_grant')) {
-      GOOGLE_REFRESH_TOKEN = undefined;
-      nconf.set('google_refresh_token', undefined);
-      nconf.save((err) => {
-        if (err) console.error(err);
-      });
-
-      res.sendStatus(401);
-      return;
-    }
-
-    res.sendStatus(500);
-    return;
-  }
-
-  res.send(allData);
-});
-
-app.get('/oauth', async (req, res) => {
-  // If the callback passed a code
-  if (req.query.code) {
-    const { tokens } = await oauth2Client.getToken(req.query.code.toString());
-    oauth2Client.setCredentials(tokens);
-
-    GOOGLE_REFRESH_TOKEN = tokens.refresh_token;
-
-    nconf.set('google_refresh_token', tokens.refresh_token);
-    nconf.save((err) => {
-      if (err) console.error(err);
-    });
-
-    res.redirect(clientUrl);
-  } else {
-    // Generate a redirect url to authenticate user
-
-    const url = oauth2Client.generateAuthUrl({
-      access_type: 'offline', // access + prompt forces a new refresh token
-      prompt: 'consent',
-      scope: 'https://www.googleapis.com/auth/calendar.readonly',
-    });
-
-    res.redirect(url);
-  }
+  cronofyClient
+    .readEvents({ from: today.toISOString(), to: tomorrow.toISOString(), tzid: TIMEZONE })
+    .then((data) => {
+      const filtered = data.events.filter((e) => e.participation_status !== 'declined');
+      res.send(filtered);
+    })
+    .catch((err) => res.send(err));
 });
 
 app.post('/spotify/oauth', (req, res) => {
@@ -231,10 +175,6 @@ app.get('/spotify/now-playing', (req, res) => {
 
         // console.log(data);
         res.send(data || {});
-
-        spotifySdk.getAccessToken().then((token) => {
-          makeSpotifySdk(token);
-        });
       })
       .catch((err) => {
         console.error(err);
@@ -316,7 +256,7 @@ app.get('/weather', async (req, res) => {
   }
 
   const url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=imperial&appid=${OPEN_WEATHER_KEY}`;
-  fetch(url)
+  fetchWithTimeout(url)
     .then((r) => r.json())
     .then((data) => {
       if (data.cod === 200) {
@@ -330,11 +270,18 @@ app.get('/weather', async (req, res) => {
     });
 });
 
+let aqiCache = { lastUpdated: 0, data: {} };
 app.get('/aqi', (req, res) => {
-  fetch(HOME_ASSISTANT_URL, { headers: { Authorization: `Bearer ${HOME_ASSISTANT_KEY}` } })
+  if (Date.now() - aqiCache.lastUpdated < 1000 * 60 * 5) {
+    res.send(aqiCache.data);
+    return;
+  }
+
+  fetchWithTimeout(HOME_ASSISTANT_URL, { headers: { Authorization: `Bearer ${HOME_ASSISTANT_KEY}` } })
     .then((res) => res.json())
     .then((data) => {
       res.send(data);
+      aqiCache = { lastUpdated: Date.now(), data };
     })
     .catch((err) => {
       res.status(500).send(err);
@@ -354,4 +301,26 @@ function makeSpotifySdk(token) {
       if (err) console.error(err);
     });
   }
+}
+
+function refreshCronofyToken() {
+  cronofyClient.refreshAccessToken().catch((err) => {
+    console.error(err);
+  });
+}
+
+// Timeout fetch request from https://dmitripavlutin.com/timeout-fetch-request/
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 8000 } = options;
+
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  const response = await fetch(resource, {
+    ...options,
+    signal: controller.signal,
+  });
+  clearTimeout(id);
+
+  return response;
 }

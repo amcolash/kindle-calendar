@@ -1,19 +1,20 @@
 import dayjs from 'dayjs';
 import Twemoji from 'react-twemoji';
 
-import { GoogleEvent } from '../types';
+import { CronofyEvent } from '../types';
 import { getEventIcon } from '../util/iconMapping';
 
 interface EventCardProps {
-  event: GoogleEvent;
+  event: CronofyEvent;
   now?: dayjs.Dayjs;
 }
 
 export function EventCard({ event, now }: EventCardProps) {
-  const start = dayjs(event.start?.dateTime || event.start?.date);
-  const end = dayjs(event.end?.dateTime || event.end?.date);
+  const start = dayjs(event.start);
+  const end = dayjs(event.end);
 
-  const allDay = event.start?.date && event.end?.date;
+  // const allDay = event.start?.date && event.end?.date;
+  const allDay = end.diff(start, 'h') > 23;
   const current = !allDay && (now || dayjs()).isBetween(start, end, null, '[]');
 
   const icon = getEventIcon(event);
@@ -28,7 +29,7 @@ export function EventCard({ event, now }: EventCardProps) {
         marginBottom: '0.5rem',
         margin: current ? '0 -0.65rem' : '0 -0.5rem',
       }}
-      key={event.id}
+      key={event.event_uid}
     >
       <Twemoji tag="span">
         <span style={{ fontWeight: 600 }}>{event.summary}</span>

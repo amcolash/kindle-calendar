@@ -11,7 +11,10 @@ export function useData<T>(url: string, interval?: number) {
       setError(undefined);
 
       return fetch(url)
-        .then((res) => res.json())
+        .then((res) => {
+          if (res.status < 400) return res.json();
+          else throw res.statusText;
+        })
         .catch((err) => {
           console.error(err);
           setData(undefined);

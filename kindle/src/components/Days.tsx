@@ -1,19 +1,20 @@
 import dayjs from 'dayjs';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
-import { GoogleEvent } from '../types';
+import { CronofyEvent } from '../types';
 import { sortEvents } from '../util/util';
 import { EventCard } from './EventCard';
 
-function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
+function parseEvents(events: CronofyEvent[], now: dayjs.Dayjs) {
   // Group events by day, and filter out events that have already ended
-  const days: { [key: string]: GoogleEvent[] } = {};
+  const days: { [key: string]: CronofyEvent[] } = {};
   events.forEach((event) => {
-    const start = dayjs(event.start?.dateTime || event.start?.date);
-    const end = dayjs(event.end?.dateTime || event.end?.date);
+    const start = dayjs(event.start);
+    const end = dayjs(event.end);
     const multiDay = end.diff(start, 'day') > 0;
 
     if (multiDay) {
+      console.log(event.summary, start.toDate(), end.toDate());
       const allDays = end.diff(start, 'day') - 1;
       for (let i = 0; i <= allDays; i++) {
         const day = start.add(i, 'day');
@@ -57,7 +58,7 @@ function parseEvents(events: GoogleEvent[], now: dayjs.Dayjs) {
 }
 
 interface DaysProps {
-  events?: GoogleEvent[];
+  events?: CronofyEvent[];
   time: string;
   error: boolean;
 }
@@ -93,7 +94,7 @@ export function Days({ events, time, error }: DaysProps) {
           )}
 
           {dayEvents.map((event) => (
-            <EventCard key={event.id} event={event} now={now} />
+            <EventCard key={event.event_uid} event={event} now={now} />
           ))}
         </div>
       ))}

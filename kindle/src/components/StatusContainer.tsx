@@ -2,7 +2,7 @@ import { PlaybackState } from '@spotify/web-api-ts-sdk';
 import { useCallback } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
-import { AQI, GoogleEvent, Weather as WeatherType } from '../types';
+import { AQI, CronofyEvent, Weather as WeatherType } from '../types';
 import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';
@@ -11,10 +11,10 @@ interface StatusContainerProps {
   playbackState?: PlaybackState;
   playbackError?: unknown;
   updatePlaybackState: () => void;
-  events?: GoogleEvent[];
+  events?: CronofyEvent[];
   now: string;
-  weather: WeatherType;
-  aqi: AQI;
+  weather?: WeatherType;
+  aqi?: AQI;
 }
 
 export function StatusContainer({
@@ -29,7 +29,7 @@ export function StatusContainer({
   const { rotation } = useRotationContext();
 
   const MusicWeather = useCallback(
-    ({ weather, aqi }: { weather: WeatherType; aqi: AQI }) => (
+    ({ weather, aqi }: { weather?: WeatherType; aqi?: AQI }) => (
       <div style={{ overflow: 'auto' }}>
         <NowPlaying
           playbackState={playbackState}

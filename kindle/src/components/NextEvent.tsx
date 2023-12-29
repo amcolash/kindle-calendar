@@ -1,9 +1,9 @@
 import dayjs from 'dayjs';
 
-import { GoogleEvent } from '../types';
+import { CronofyEvent } from '../types';
 
 interface UpcomingEventProps {
-  events?: GoogleEvent[];
+  events?: CronofyEvent[];
   time: string;
 }
 
@@ -14,23 +14,23 @@ export function UpcomingEvent({ events, time }: UpcomingEventProps) {
 
   const filteredEvents = events
     .filter((event) => {
-      if (event.start?.date) return false; // No all-day events
-      return now.isBefore(dayjs(event.end?.dateTime || event.end?.date));
+      const allDay = dayjs(event.end).diff(event.start, 'h') > 23;
+      return !allDay && now.isBefore(dayjs(event.end));
     })
-    .sort((a, b) => dayjs(a.start?.dateTime || a.start?.date).diff(dayjs(b.start?.dateTime || b.start?.date)));
+    .sort((a, b) => dayjs(a.start).diff(dayjs(b.start)));
 
   const next = filteredEvents[0];
 
   if (next) {
-    const future = dayjs(next.start?.dateTime || next.start?.date).isAfter(now);
+    const future = dayjs(next.start).isAfter(now);
     return (
       <>
-        <div style={{ margin: '0.5rem 0 0.75rem', borderBottom: '1px solid #888', width: '100%' }}></div>
+        <div style={{ margin: '0.75rem 0', borderBottom: '1px solid #888', width: '100%' }}></div>
 
         <div>
           {future ? 'Up Next: ' : 'Happening Now: '}
           {next.summary}
-          {future ? ' ' + dayjs(next.start?.dateTime || next.start?.date).from(now) : ''}
+          {future ? ' ' + dayjs(next.start).from(now) : ''}
         </div>
       </>
     );

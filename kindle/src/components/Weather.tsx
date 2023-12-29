@@ -1,4 +1,4 @@
-import 'weather-icons/css/weather-icons.min.css';
+import 'weather-icons/css/weather-icons.css';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { AQI, Weather as WeatherType } from '../types';
@@ -14,7 +14,7 @@ export function Weather({ isPlaying: playing, weather, aqi }: WeatherProps) {
   const { rotation } = useRotationContext();
   const isPlaying = playing && rotation === Rotation.Portrait;
 
-  if (!weather || !aqi) return null;
+  if (!weather) return null;
 
   const weatherStyle: React.CSSProperties = {
     display: isPlaying ? undefined : 'inline-block',
@@ -49,10 +49,12 @@ export function Weather({ isPlaying: playing, weather, aqi }: WeatherProps) {
         <span style={textStyle}>{weather.main.humidity}%</span>
       </div>
 
-      <div style={weatherStyle}>
-        <i className="wi wi-smog" style={iconStyle} />
-        <span style={textStyle}>{aqi.state}</span>
-      </div>
+      {aqi && (
+        <div style={weatherStyle}>
+          <i className="wi wi-smog" style={iconStyle} />
+          <span style={textStyle}>{aqi.state}</span>
+        </div>
+      )}
     </div>
   );
 }

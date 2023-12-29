@@ -5,7 +5,7 @@ import Gathertown from '../icons/gathertown.png';
 import { ReactComponent as Meet } from '../icons/meet.svg';
 import { ReactComponent as Slack } from '../icons/slack.svg';
 import { ReactComponent as Zoom } from '../icons/zoom.svg';
-import { GoogleEvent, WeatherElement } from '../types';
+import { CronofyEvent, WeatherElement } from '../types';
 
 export function getIcon(weather: WeatherElement): string {
   const icon = weather.icon;
@@ -206,16 +206,16 @@ const iconStyle: CSSProperties = {
   verticalAlign: 'middle',
 };
 
-export function getEventIcon(event: GoogleEvent): JSX.Element | null {
+export function getEventIcon(event: CronofyEvent): JSX.Element | null {
   const summary = (event.summary || '').toLowerCase();
 
   if (summary.includes('chiro') || summary.includes('massage')) return <Bike style={iconStyle} />;
 
   if (summary.includes('gathertown')) return <img src={Gathertown} alt="gathertown" style={iconStyle} />;
   if (summary.includes('standup')) return <Slack style={iconStyle} />;
-  if (event.conferenceData?.conferenceSolution?.name?.toLowerCase().includes('zoom')) return <Zoom style={iconStyle} />;
 
-  if (event.hangoutLink) return <Meet style={iconStyle} />;
+  if (event.meeting_url?.toLowerCase().includes('zoom.us')) return <Zoom style={iconStyle} />;
+  if (event.meeting_url?.toLowerCase().includes('meet.google.com')) return <Meet style={iconStyle} />;
 
   return null;
 }

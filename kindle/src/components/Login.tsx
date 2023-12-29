@@ -1,10 +1,9 @@
 import { SpotifyApi } from '@spotify/web-api-ts-sdk';
-import { GoogleLoginButton } from 'react-social-login-buttons';
 
 import { SERVER, SPOTIFY_CLIENT_ID } from '../util/util';
 
 export interface Status {
-  google?: boolean;
+  cronofy?: boolean;
   spotify?: boolean;
   docker?: boolean;
 }
@@ -38,12 +37,7 @@ export function Login({ status }: LoginProps) {
     >
       <div style={{ width: '15rem' }}>
         Server is {SERVER}
-        {!status?.google && (
-          <GoogleLoginButton
-            onClick={() => (window.location.href = `${SERVER}/oauth`)}
-            style={{ marginTop: '1rem', height: '2.5rem', width: '100%', fontSize: '0.75rem' }}
-          />
-        )}
+        {!status?.cronofy && <div>LOGIN TO CRONOFY</div>}
         {!status?.spotify && (
           <button
             onClick={() => loginSpotify(status?.docker)}

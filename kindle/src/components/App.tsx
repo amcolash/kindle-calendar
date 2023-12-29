@@ -6,7 +6,7 @@ import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { useClearScreen } from '../hooks/useClearScreen';
 import { useData } from '../hooks/useData';
 import { useRerender } from '../hooks/useRerender';
-import { AQI, GoogleEvent, Weather } from '../types';
+import { AQI, CronofyEvent, Weather } from '../types';
 import { HEIGHT, SERVER } from '../util/util';
 import { Days } from './Days';
 import { KindleButtons } from './KindleButtons';
@@ -18,7 +18,7 @@ export function App() {
   const { rotation } = useRotationContext();
 
   const { data: status, loading: loadingStatus } = useData<Status>(`${SERVER}/status`, 5 * 60 * 1000);
-  const { data: events, error: eventError } = useData<GoogleEvent[]>(`${SERVER}/events`, 5 * 60 * 1000);
+  const { data: events, error: eventError } = useData<CronofyEvent[]>(`${SERVER}/events`, 5 * 60 * 1000);
   const { data: weather } = useData<Weather>(`${SERVER}/weather`, 5 * 60 * 1000);
   const { data: aqi } = useData<AQI>(`${SERVER}/aqi`, 5 * 60 * 1000);
 
@@ -43,8 +43,8 @@ export function App() {
     else setPlaybackUpdate(60 * 1000);
   }, [playbackState]);
 
-  if (loadingStatus || !status || !weather || !aqi) return null;
-  if (!status.google || !status.spotify) return <Login status={status} />;
+  if (loadingStatus || !status) return <div>Loading...</div>;
+  if (!status.cronofy || !status.spotify) return <Login status={status} />;
 
   let containerHeight;
   const playbarOffset = playbackState?.is_playing ? 372 : 212;
