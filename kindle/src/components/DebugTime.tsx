@@ -4,17 +4,16 @@ interface DebugTimeProps {
 }
 
 export function DebugTime({ now, setNow }: DebugTimeProps) {
-  if (!process.env.DEV) return null;
+  if (process.env.NODE_ENV === 'production') return null;
 
   return (
     <div
       style={{
         position: 'fixed',
-        top: '2.25rem',
-        right: '2.25rem',
-        padding: '1.25rem',
-        background: 'white',
+        top: '1.5rem',
+        right: '1.65rem',
         lineHeight: '1rem',
+        zIndex: 2,
       }}
     >
       <input type="datetime-local" value={now} onChange={(e) => setNow(e.target.value)} />
