@@ -6,11 +6,11 @@ export interface CronofyEvent {
   event_uid: string;
   summary: string;
   description: string;
-  start: Date;
-  end: Date;
+  start: string;
+  end: string;
   deleted: boolean;
-  created: Date;
-  updated: Date;
+  created: string;
+  updated: string;
   event_private: boolean;
   participation_status: ParticipationStatusEnum;
   attendees: Attendee[];

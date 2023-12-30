@@ -1,5 +1,5 @@
 import { PlaybackState } from '@spotify/web-api-ts-sdk';
-import dayjs from 'dayjs';
+// import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
@@ -9,6 +9,7 @@ import { useRerender } from '../hooks/useRerender';
 import { AQI, CronofyEvent, Weather } from '../types';
 import { HEIGHT, SERVER } from '../util/util';
 import { Days } from './Days';
+// import { DebugTime } from './DebugTime';
 import { KindleButtons } from './KindleButtons';
 import { Login, Status, loginSpotify } from './Login';
 import { StatusContainer } from './StatusContainer';
@@ -30,9 +31,10 @@ export function App() {
   } = useData<PlaybackState>(`${SERVER}/spotify/now-playing`, playbackUpdate);
 
   useRerender(60 * 1000); // Refresh ui on page every minute, on the minute (this updates upcoming events + currently highlighted events)
-  const now = dayjs().format('YYYY-MM-DDTHH:mm');
 
-  // const [now, setNow] = useState(dayjs().format('YYYY-MM-DDTHH:mm'));
+  let now;
+  // const now = dayjs().format('YYYY-MM-DDTHH:mm');
+  // const [now, setNow] = useState(DateTime.now().toFormat('YYYY-MM-DDTHH:mm'));
 
   useEffect(() => {
     if (window.location.search.includes('code=')) loginSpotify(status?.docker);
@@ -64,7 +66,7 @@ export function App() {
         <KindleButtons />
         {/* <DebugTime now={now} setNow={setNow} /> */}
 
-        <Days events={events} time={now} error={eventError !== undefined} />
+        <Days events={events} now={now} error={eventError !== undefined} />
       </div>
 
       {clearScreenEl}

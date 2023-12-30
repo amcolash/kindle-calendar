@@ -1,4 +1,5 @@
 import { PlaybackState } from '@spotify/web-api-ts-sdk';
+import { DateTime } from 'luxon';
 import { useCallback } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
@@ -12,7 +13,7 @@ interface StatusContainerProps {
   playbackError?: unknown;
   updatePlaybackState: () => void;
   events?: CronofyEvent[];
-  now: string;
+  now?: DateTime;
   weather?: WeatherType;
   aqi?: AQI;
 }
@@ -59,7 +60,7 @@ export function StatusContainer({
       }}
     >
       <MusicWeather weather={weather} aqi={aqi} />
-      <UpcomingEvent events={events} time={now} />
+      <UpcomingEvent events={events} now={now} />
     </div>
   );
 }

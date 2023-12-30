@@ -1,36 +1,36 @@
-import dayjs from 'dayjs';
+import { DateTime } from 'luxon';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { CronofyEvent } from '../types';
 import { sortEvents } from '../util/util';
 import { EventCard } from './EventCard';
 
-function parseEvents(events: CronofyEvent[], now: dayjs.Dayjs) {
+const dayFormat = 'D';
+
+function parseEvents(events: CronofyEvent[], now: DateTime) {
   // Group events by day, and filter out events that have already ended
   const days: { [key: string]: CronofyEvent[] } = {};
   events.forEach((event) => {
-    const start = dayjs(event.start);
-    const end = dayjs(event.end);
-    const multiDay = end.diff(start, 'day') > 0;
+    const start = DateTime.fromISO(event.start);
+    const end = DateTime.fromISO(event.end);
+    const duration = Math.ceil(end.diff(start, 'days').days);
 
-    if (multiDay) {
-      console.log(event.summary, start.toDate(), end.toDate());
-      const allDays = end.diff(start, 'day') - 1;
-      for (let i = 0; i <= allDays; i++) {
-        const day = start.add(i, 'day');
+    if (duration > 1) {
+      for (let i = 0; i <= duration; i++) {
+        const day = start.plus({ day: i });
 
         // Only add days that are now or in the future
-        if (day.isSameOrAfter(now, 'day')) {
-          const key = day.format('MM/DD/YYYY');
+        if (day.startOf('day') >= now.startOf('day') && !end.equals(day.startOf('day'))) {
+          const key = day.toFormat(dayFormat);
           days[key] = days[key] || [];
           days[key].push(event);
         }
       }
     } else {
-      const key = start.format('MM/DD/YYYY');
-      if (start.isSameOrAfter(now, 'day')) {
+      const key = start.toFormat(dayFormat);
+      if (now <= end) {
         days[key] = days[key] || [];
-        if (now.isBefore(end)) days[key].push(event);
+        if (now < end) days[key].push(event);
       }
     }
   });
@@ -44,10 +44,10 @@ function parseEvents(events: CronofyEvent[], now: dayjs.Dayjs) {
   });
 
   // Ensure that today and tomorrow are always in the list
-  const tomorrow = now.add(1, 'day');
+  const tomorrow = now.plus({ day: 1 });
 
-  const nowKey = now.format('MM/DD/YYYY');
-  const tomorrowKey = tomorrow.format('MM/DD/YYYY');
+  const nowKey = now.toFormat(dayFormat);
+  const tomorrowKey = tomorrow.toFormat(dayFormat);
 
   if (!dayList.find((d) => d.day === nowKey)) dayList.push({ day: nowKey, dayEvents: [] });
   if (!dayList.find((d) => d.day === tomorrowKey)) dayList.push({ day: tomorrowKey, dayEvents: [] });
@@ -59,18 +59,16 @@ function parseEvents(events: CronofyEvent[], now: dayjs.Dayjs) {
 
 interface DaysProps {
   events?: CronofyEvent[];
-  time: string;
+  now?: DateTime;
   error: boolean;
 }
 
-export function Days({ events, time, error }: DaysProps) {
+export function Days({ events, now = DateTime.now(), error }: DaysProps) {
   const { rotation } = useRotationContext();
 
   if (error) return <span>Error Getting Events</span>;
-
   if (!events) return null;
 
-  const now = dayjs(time);
   const dayList = parseEvents(events, now);
 
   return (
@@ -85,16 +83,18 @@ export function Days({ events, time, error }: DaysProps) {
           }}
           key={day}
         >
-          <div style={{ fontSize: '1.3em', marginBottom: '0.5rem' }}>{dayjs(day).format('dddd, MMM D')}</div>
+          <div style={{ fontSize: '1.3em', marginBottom: '0.5rem' }}>
+            {DateTime.fromFormat(day, dayFormat).toFormat('EEEE, MMM d')}
+          </div>
 
           {dayEvents.length === 0 && (
             <div style={{ color: 'grey', marginBottom: '0.5rem' }}>
-              {dayjs(day).isSame(now, 'day') ? 'No more events today' : 'No events scheduled'}
+              {DateTime.fromFormat(day, dayFormat).day === now.day ? 'No more events today' : 'No events scheduled'}
             </div>
           )}
 
           {dayEvents.map((event) => (
-            <EventCard key={event.event_uid} event={event} now={now} />
+            <EventCard key={event.event_uid} event={event} now={now} currentDay={DateTime.fromFormat(day, dayFormat)} />
           ))}
         </div>
       ))}

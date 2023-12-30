@@ -1,13 +1,15 @@
 import 'cross-fetch/polyfill';
+import { Settings } from 'luxon';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './components/App';
 import { RotationProvider } from './contexts/rotationContext';
 import './index.css';
 import { setupRefresh } from './util/refreshKindle';
-import { setupDayJs } from './util/setupDayjs';
 
-setupDayJs();
+// Set default luxon timezone to PST
+Settings.defaultZone = 'America/Los_Angeles';
+
 setupRefresh();
 
 // @ts-ignore
