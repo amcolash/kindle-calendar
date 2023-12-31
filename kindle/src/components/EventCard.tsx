@@ -1,4 +1,4 @@
-import { DateTime, Interval } from 'luxon';
+import moment, { Moment } from 'moment-timezone';
 import Twemoji from 'react-twemoji';
 
 import { CronofyEvent } from '../types';
@@ -6,35 +6,34 @@ import { getEventIcon } from '../util/iconMapping';
 
 interface EventCardProps {
   event: CronofyEvent;
-  currentDay: DateTime;
-  now?: DateTime;
+  currentDay: Moment;
+  now?: Moment;
 }
 
-export function EventCard({ event, currentDay, now = DateTime.now() }: EventCardProps) {
-  let start: DateTime | undefined = DateTime.fromISO(event.start);
-  let end: DateTime | undefined = DateTime.fromISO(event.end);
-  const eventInterval = Interval.fromDateTimes(start, end);
+export function EventCard({ event, currentDay, now = moment() }: EventCardProps) {
+  let start: Moment | undefined = moment(event.start);
+  let end: Moment | undefined = moment(event.end);
 
-  const dayStart = currentDay.startOf('day');
-  const dayEnd = currentDay.endOf('day');
+  const dayStart = currentDay.clone().startOf('day');
+  const dayEnd = currentDay.clone().endOf('day');
 
-  const fullDay = eventInterval.contains(dayStart) && eventInterval.contains(dayEnd);
-  const currentlyHappening = end.diff(start, 'hours').hours < 23 && eventInterval.contains(now);
+  const fullDay = start.isSameOrBefore(dayStart) && end.isSameOrAfter(dayEnd);
+  const currentlyHappening = end.diff(start, 'hours') < 23 && now.isBetween(start, end, 'minute', '[]');
 
   // Special All Day Start/Ends
-  if (!fullDay && end.diff(start, 'hours').hours > 23) {
-    if (start < currentDay.startOf('day')) start = undefined;
-    if (end > currentDay.endOf('day')) end = undefined;
+  if (!fullDay && end.diff(start, 'hours') > 23) {
+    if (start < dayStart) start = undefined;
+    if (end > dayEnd) end = undefined;
   }
 
   const icon = getEventIcon(event);
 
   // Build label for start/end when it is not a full day event
   const startLabel = start && !end ? '[All Day] Begins ' : '';
-  const startTime = start?.toFormat('t') || '';
+  const startTime = start?.format('h:mm A') || '';
   const noLabel = start && end ? ' - ' : '';
   const endLabel = !start && end ? '[All Day] Until ' : '';
-  const endTime = end?.toFormat('t') || '';
+  const endTime = end?.format('h:mm A') || '';
 
   const timeLabel = `${startLabel}${startTime}${noLabel}${endLabel}${endTime}`;
 

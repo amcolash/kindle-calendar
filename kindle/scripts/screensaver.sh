@@ -14,12 +14,13 @@ fi
 
 # From https://mobileread.com/forums/showthread.php?t=200266
 # Always force light off if it set to 0 (anything other than 0 is ignored)
-intensity=$(cat /sys/class/backlight/max77696-bl/brightness | grep -e '[0-9]');
+intensity=$(cat /sys/class/backlight/max77696-bl/brightness | grep -e '[0-9]')
 if [ "$intensity" = "1" ]; then
-  echo -n 0 > /sys/class/backlight/max77696-bl/brightness;
+  echo -n 0 >/sys/class/backlight/max77696-bl/brightness
 fi
 
 # Keep track of battery level over time
-BATTERY=$(lipc-get-prop com.lab126.powerd battLevel)
-TIME=$(date +%s)
-echo "$TIME, $BATTERY" >> /mnt/us/battery.log
+# BATTERY=$(lipc-get-prop com.lab126.powerd battLevel)
+# CHARGING=$(lipc-get-prop com.lab126.powerd isCharging)
+# TIME=$(date +%s)
+# echo "$TIME, $BATTERY, $CHARGING" >>/mnt/us/battery.log

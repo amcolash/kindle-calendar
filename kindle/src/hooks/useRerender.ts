@@ -1,4 +1,4 @@
-import { DateTime } from 'luxon';
+import moment from 'moment-timezone';
 import { useEffect, useState } from 'react';
 
 export function useRerender(interval: number) {
@@ -6,7 +6,7 @@ export function useRerender(interval: number) {
 
   useEffect(() => {
     // start refresh at the start of the next minute to ensure the delay starts at the start of the minute
-    const nextTimeout = DateTime.now().endOf('minute').diffNow('milliseconds').milliseconds;
+    const nextTimeout = moment().endOf('minute').diff(moment(), 'milliseconds');
 
     setTimeout(() => {
       rerender((prev) => prev + 1);

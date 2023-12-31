@@ -1,5 +1,5 @@
 import 'cross-fetch/polyfill';
-import { Settings } from 'luxon';
+import moment from 'moment-timezone';
 import { createRoot } from 'react-dom/client';
 
 import { App } from './components/App';
@@ -7,9 +7,10 @@ import { RotationProvider } from './contexts/rotationContext';
 import './index.css';
 import { setupRefresh } from './util/refreshKindle';
 
-// Set default luxon timezone to PST
-Settings.defaultZone = 'America/Los_Angeles';
+moment.tz.setDefault('America/Los_Angeles');
+// console.log(moment.tz.names());
 
+// Refresh display every minute
 setupRefresh();
 
 // @ts-ignore

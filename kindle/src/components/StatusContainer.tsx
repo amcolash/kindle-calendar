@@ -1,5 +1,5 @@
 import { PlaybackState } from '@spotify/web-api-ts-sdk';
-import { DateTime } from 'luxon';
+import { Moment } from 'moment';
 import { useCallback } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
@@ -13,7 +13,7 @@ interface StatusContainerProps {
   playbackError?: unknown;
   updatePlaybackState: () => void;
   events?: CronofyEvent[];
-  now?: DateTime;
+  now?: Moment;
   weather?: WeatherType;
   aqi?: AQI;
 }
