@@ -28,7 +28,7 @@ export function UpcomingEvent({ events, now = moment() }: UpcomingEventProps) {
   const next = filteredEvents[0];
 
   if (next) {
-    const future = moment(next.start) > now;
+    const future = moment(next.start) >= now;
     return (
       <>
         <div style={{ margin: '0.75rem 0', borderBottom: '1px solid #888', width: '100%' }}></div>
@@ -36,7 +36,7 @@ export function UpcomingEvent({ events, now = moment() }: UpcomingEventProps) {
         <div>
           {future ? 'Up Next: ' : 'Happening Now: '}
           {next.summary}
-          {future ? ' ' + moment(next.start).toNow() : ''}
+          {future ? ' ' + now.to(moment(next.start)) : ''}
         </div>
       </>
     );

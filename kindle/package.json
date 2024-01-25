@@ -32,7 +32,8 @@
     "build": "react-scripts build",
     "postbuild": "node scripts/bundle-kual-app.js",
     "serve": "serve -s build -l 4000",
-    "watch": "nodemon --exec 'echo { \\\"date\\\": \\\"$(date)\\\" } > public/date.json && npm run build && rsync -azvv --no-perms --no-owner --no-group --delete build/com.amcolash.kindle_dashboard kindle:/mnt/us/extensions' --watch src --watch scripts -e tsx,ts,jsx,js,css,xml,sh",
+    "deploy": "echo { \\\"date\\\": \\\"$(date)\\\" } > public/date.json && npm run build && rsync -azvv --no-perms --no-owner --no-group --delete build/com.amcolash.kindle_dashboard kindle:/mnt/us/extensions",
+    "watch": "nodemon --exec 'npm run deploy' --watch src --watch scripts -e tsx,ts,jsx,js,css,xml,sh",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -38,7 +38,14 @@ export function App() {
 
   useEffect(() => {
     if (window.location.search.includes('code=')) loginSpotify(status?.docker);
-  }, [status]);
+
+    let timeout: NodeJS.Timeout;
+    if (!loadingStatus && !status) timeout = setTimeout(() => window.location.reload(), 15 * 1000);
+
+    return () => {
+      if (timeout) clearTimeout(timeout);
+    };
+  }, [status, loadingStatus]);
 
   useEffect(() => {
     if (playbackState && playbackState.is_playing) setPlaybackUpdate(10 * 1000);

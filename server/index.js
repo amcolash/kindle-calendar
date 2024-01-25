@@ -65,8 +65,8 @@ if (existsSync('./.cert/RSA-fullchain.pem')) {
   credentials.cert = readFileSync('./.cert/cert.pem');
 }
 
-if (!credentials.key) throw 'Missing key for https server';
-if (!credentials.cert) throw 'Missing cert for https server';
+if (!credentials.key) console.error('Missing key for https server');
+if (!credentials.cert) console.error('Missing cert for https server');
 
 // Make the server
 const app = express();
@@ -127,9 +127,11 @@ new CronJob(
 app.use(cors());
 app.use(express.json());
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server (https) listening on port ${PORT}`);
-});
+if (credentials.key && credentials.cert) {
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server (https) listening on port ${PORT}`);
+  });
+}
 
 server2.listen(PORT + 1, '0.0.0.0', () => {
   console.log(`Server (http) listening on port ${PORT + 1}`);
@@ -144,11 +146,11 @@ app.get('/status', (req, res) => {
 });
 
 app.get('/events', async (req, res) => {
-  const today = DateTime.now().setZone(TIMEZONE).startOf('day');
-  const tomorrow = today.plus({ days: 1 }).endOf('day');
+  const today = DateTime.now().startOf('day');
+  const future = today.plus({ days: 1 }).endOf('day'); // one day in the future
 
   cronofyClient
-    .readEvents({ from: today.toISO(), to: tomorrow.toISO(), tzid: TIMEZONE })
+    .readEvents({ from: today.toISODate(), to: future.plus({ days: 1 }).toISODate(), tzid: TIMEZONE }) // to is exclusive, so add a day
     .then((data) => {
       const filtered = data.events.filter((e) => e.participation_status !== 'declined');
       res.send(filtered);
