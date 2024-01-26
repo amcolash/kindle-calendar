@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-import { KindleAPI } from '../components/Kindle';
 import { KINDLE } from '../util/util';
 
 export function useClearScreen() {
@@ -8,15 +7,13 @@ export function useClearScreen() {
 
   // Momentarily clear screen to refresh e-ink display
   const clearScreen = () => {
-    setTimeout(() => setShouldClearScreen(true), 500);
+    setTimeout(() => setShouldClearScreen(true), 300);
     setTimeout(() => setShouldClearScreen(false), 1000);
   };
 
   // Clear screen every 15 minutes and set title bar to empty
   useEffect(() => {
     if (KINDLE) {
-      KindleAPI.chrome.setTitleBar('', '');
-
       setTimeout(clearScreen, 1000);
 
       const int = setInterval(clearScreen, 1000 * 60 * 15);

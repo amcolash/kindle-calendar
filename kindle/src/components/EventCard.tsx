@@ -31,11 +31,14 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
   // Build label for start/end when it is not a full day event
   const startLabel = start && !end ? '[All Day] Begins ' : '';
   const startTime = start?.format('h:mm A') || '';
+  const startTimeEt = start?.tz('America/New_York').format('h:mm A') || '';
   const noLabel = start && end ? ' - ' : '';
   const endLabel = !start && end ? '[All Day] Until ' : '';
   const endTime = end?.format('h:mm A') || '';
+  const endTimeEt = end?.tz('America/New_York').format('h:mm A') || '';
 
   const timeLabel = `${startLabel}${startTime}${noLabel}${endLabel}${endTime}`;
+  const easternTimeLabel = `${startLabel}${startTimeEt}${noLabel}${endLabel}${endTimeEt} (ET)`;
 
   return (
     <div
@@ -55,7 +58,12 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
 
       {icon}
 
-      <div style={{ marginTop: '0.25rem' }}>{fullDay ? '[All Day]' : timeLabel}</div>
+      <div style={{ position: 'relative' }}>
+        <div style={{ marginTop: '0.25rem' }}>{fullDay ? '[All Day]' : timeLabel}</div>
+        <div style={{ position: 'absolute', bottom: '0.25rem', right: 0, fontSize: 20 }}>
+          {fullDay ? '[All Day]' : easternTimeLabel}
+        </div>
+      </div>
     </div>
   );
 }
