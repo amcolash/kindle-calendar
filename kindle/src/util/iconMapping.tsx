@@ -1,9 +1,10 @@
 import React, { CSSProperties } from 'react';
 
 import { ReactComponent as Bike } from '../icons/bike.svg';
-import Gathertown from '../icons/gathertown.png';
+import { ReactComponent as Gathertown } from '../icons/gathertown.svg';
 import { ReactComponent as Meet } from '../icons/meet.svg';
 import { ReactComponent as Slack } from '../icons/slack.svg';
+import { ReactComponent as Walk } from '../icons/walk.svg';
 import { ReactComponent as Zoom } from '../icons/zoom.svg';
 import { CronofyEvent, WeatherElement } from '../types';
 
@@ -210,8 +211,9 @@ export function getEventIcon(event: CronofyEvent): JSX.Element | null {
   const summary = (event.summary || '').toLowerCase();
 
   if (summary.includes('chiro') || summary.includes('massage')) return <Bike style={iconStyle} />;
+  if (summary.includes('pt')) return <Walk style={iconStyle} />;
 
-  if (summary.includes('gathertown')) return <img src={Gathertown} alt="gathertown" style={iconStyle} />;
+  if (summary.includes('gathertown')) return <Gathertown style={iconStyle} />;
   if (summary.includes('standup')) return <Slack style={iconStyle} />;
 
   if (event.meeting_url?.toLowerCase().includes('zoom.us')) return <Zoom style={iconStyle} />;

@@ -5,7 +5,7 @@ import { DEBUG, KINDLE } from '../util/util';
 
 let initialDate: string;
 export function setupRefresh() {
-  if (KINDLE)
+  if (KINDLE) {
     setInterval(
       () => {
         fetch('./date.json')
@@ -24,4 +24,7 @@ export function setupRefresh() {
       },
       (DEBUG ? 2 : 60) * 1000
     );
+
+    setTimeout(() => window.location.reload(), 1000 * 60 * 60 * 8); // Reload every 8 hours to prevent memory leaks / crashing
+  }
 }
