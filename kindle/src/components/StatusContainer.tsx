@@ -37,7 +37,7 @@ export function StatusContainer({
           error={playbackError !== undefined}
           updatePlaybackState={updatePlaybackState}
         />
-        <Weather isPlaying={playbackState?.is_playing} weather={weather} aqi={aqi} />
+        <Weather isPlaying={playbackState !== undefined} weather={weather} aqi={aqi} />
       </div>
     ),
     [playbackState, playbackError, updatePlaybackState]

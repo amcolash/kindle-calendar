@@ -4,6 +4,7 @@ import { ReactComponent as Bike } from '../icons/bike.svg';
 import { ReactComponent as Gathertown } from '../icons/gathertown.svg';
 import { ReactComponent as Meet } from '../icons/meet.svg';
 import { ReactComponent as Slack } from '../icons/slack.svg';
+import { ReactComponent as Tada } from '../icons/tada.svg';
 import { ReactComponent as Walk } from '../icons/walk.svg';
 import { ReactComponent as Zoom } from '../icons/zoom.svg';
 import { CronofyEvent, WeatherElement } from '../types';
@@ -212,6 +213,7 @@ export function getEventIcon(event: CronofyEvent): JSX.Element | null {
 
   if (summary.includes('chiro') || summary.includes('massage')) return <Bike style={iconStyle} />;
   if (summary.includes('pt')) return <Walk style={iconStyle} />;
+  if (summary.includes('mha')) return <Tada style={iconStyle} />;
 
   if (summary.includes('gathertown')) return <Gathertown style={iconStyle} />;
   if (summary.includes('standup')) return <Slack style={iconStyle} />;
