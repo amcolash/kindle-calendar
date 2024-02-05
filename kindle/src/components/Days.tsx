@@ -78,7 +78,7 @@ export function Days({ events, now = moment(), error }: DaysProps) {
 
   return (
     <div style={{ width: rotation === Rotation.Portrait ? undefined : '55%' }}>
-      {dayList.map(({ day: d, dayEvents }) => {
+      {dayList.map(({ day: d, dayEvents }, index) => {
         const day = moment(d, dayFormat);
 
         return (
@@ -100,7 +100,13 @@ export function Days({ events, now = moment(), error }: DaysProps) {
             )}
 
             {dayEvents.map((event) => (
-              <EventCard key={event.event_uid} event={event} now={now} currentDay={day} />
+              <EventCard
+                key={event.event_uid}
+                event={event}
+                now={now}
+                currentDay={day}
+                last={index === dayList.length - 1}
+              />
             ))}
           </div>
         );

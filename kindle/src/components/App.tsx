@@ -36,6 +36,12 @@ export function App() {
   // const now = dayjs().format('YYYY-MM-DDTHH:mm');
   // const [now, setNow] = useState(DateTime.now().toFormat('YYYY-MM-DDTHH:mm'));
 
+  const isPlaying: 'playing' | 'paused' | 'stopped' = playbackState?.is_playing
+    ? 'playing'
+    : playbackState?.is_playing === undefined
+    ? 'stopped'
+    : 'paused';
+
   useEffect(() => {
     if (window.location.search.includes('code=')) loginSpotify(status?.docker);
 
@@ -48,15 +54,15 @@ export function App() {
   }, [status, loadingStatus]);
 
   useEffect(() => {
-    if (playbackState && playbackState.is_playing) setPlaybackUpdate(10 * 1000);
+    if (isPlaying === 'playing') setPlaybackUpdate(10 * 1000);
     else setPlaybackUpdate(60 * 1000);
-  }, [playbackState]);
+  }, [isPlaying]);
 
   if (loadingStatus || !status) return <div>Loading...</div>;
   if (!status.cronofy || !status.spotify) return <Login status={status} />;
 
   let containerHeight;
-  const playbarOffset = playbackState?.is_playing ? 372 : 212;
+  const playbarOffset = isPlaying === 'stopped' ? 212 : 362;
   if (rotation === Rotation.Portrait) containerHeight = HEIGHT - playbarOffset;
 
   return (

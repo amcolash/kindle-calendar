@@ -8,9 +8,10 @@ interface EventCardProps {
   event: CronofyEvent;
   currentDay: Moment;
   now?: Moment;
+  last: boolean;
 }
 
-export function EventCard({ event, currentDay, now = moment() }: EventCardProps) {
+export function EventCard({ event, currentDay, now = moment(), last }: EventCardProps) {
   let start: Moment | undefined = moment(event.start);
   let end: Moment | undefined = moment(event.end);
 
@@ -47,7 +48,7 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
         border: currentlyHappening ? '0.15rem solid grey' : undefined,
         background: currentlyHappening ? '#ddd' : undefined,
         borderRadius: '0.5rem',
-        marginBottom: '0.5rem',
+        marginBottom: last ? '0.25rem' : '0.5rem',
         margin: currentlyHappening ? '0 -0.65rem' : '0 -0.5rem',
       }}
       key={event.event_uid}

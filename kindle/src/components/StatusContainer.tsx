@@ -28,6 +28,11 @@ export function StatusContainer({
   aqi,
 }: StatusContainerProps) {
   const { rotation } = useRotationContext();
+  const isPlaying: 'playing' | 'paused' | 'stopped' = playbackState?.is_playing
+    ? 'playing'
+    : playbackState?.is_playing === undefined
+    ? 'stopped'
+    : 'paused';
 
   const MusicWeather = useCallback(
     ({ weather, aqi }: { weather?: WeatherType; aqi?: AQI }) => (
@@ -37,10 +42,10 @@ export function StatusContainer({
           error={playbackError !== undefined}
           updatePlaybackState={updatePlaybackState}
         />
-        <Weather isPlaying={playbackState !== undefined} weather={weather} aqi={aqi} />
+        <Weather isPlaying={isPlaying !== 'stopped'} weather={weather} aqi={aqi} />
       </div>
     ),
-    [playbackState, playbackError, updatePlaybackState]
+    [isPlaying, playbackState, playbackError, updatePlaybackState]
   );
 
   return (
