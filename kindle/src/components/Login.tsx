@@ -55,6 +55,7 @@ export function Login({ status }: LoginProps) {
             Log in with Spotify
           </button>
         )}
+        <button onClick={() => window.location.reload()}>Refresh</button>
       </div>
     </div>
   );
