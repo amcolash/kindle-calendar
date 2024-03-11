@@ -3,8 +3,20 @@ import { useState } from 'react';
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { KINDLE } from '../util/util';
 import { KindleAPI } from './Kindle';
+import { Status, loginSpotify } from './Login';
 
-export function KindleButtons() {
+const buttonStyle: React.CSSProperties = {
+  display: 'block',
+  width: '100%',
+  textAlign: 'center',
+  marginBottom: '0.45rem',
+};
+
+interface KindleButtonsProps {
+  status?: Status;
+}
+
+export function KindleButtons(props: KindleButtonsProps) {
   const [showButtons, setShowButtons] = useState(false);
   const { rotation, setRotation } = useRotationContext();
 
@@ -34,20 +46,20 @@ export function KindleButtons() {
             zIndex: 1,
           }}
         >
-          <button
-            style={{ display: 'block', width: '100%', textAlign: 'center', marginBottom: '0.45rem' }}
-            onClick={() => window.location.reload()}
-          >
+          <button style={buttonStyle} onClick={() => window.location.reload()}>
             Refresh
           </button>
           <button
-            style={{ display: 'block', width: '100%', textAlign: 'center', marginBottom: '0.45rem' }}
+            style={buttonStyle}
             onClick={() => setRotation(rotation === Rotation.Portrait ? Rotation.Landscape : Rotation.Portrait)}
           >
             Rotate ({rotation})
           </button>
+          <button style={buttonStyle} onClick={() => loginSpotify(props.status?.docker)}>
+            Spotify Re-login
+          </button>
           <button
-            style={{ display: 'block', width: '100%', textAlign: 'center', marginBottom: '0.45rem' }}
+            style={buttonStyle}
             onClick={() => {
               if (KINDLE) KindleAPI.appmgr.back();
             }}

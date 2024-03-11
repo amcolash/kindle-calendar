@@ -58,12 +58,12 @@ export function App() {
     else setPlaybackUpdate(60 * 1000);
   }, [isPlaying]);
 
-  if (loadingStatus || !status) return <div>Loading...</div>;
-  if (!status.cronofy || !status.spotify) return <Login status={status} />;
-
   let containerHeight;
   const playbarOffset = isPlaying === 'stopped' ? 212 : 362;
   if (rotation === Rotation.Portrait) containerHeight = HEIGHT - playbarOffset;
+
+  if (loadingStatus || !status) return <div style={{ textAlign: 'center', marginTop: playbarOffset }}>Loading...</div>;
+  if (!status.cronofy || !status.spotify) return <Login status={status} />;
 
   return (
     <>
@@ -76,7 +76,7 @@ export function App() {
           // WebkitTransform: rotation === Rotation.Portrait ? undefined : 'rotate(90deg)',
         }}
       >
-        <KindleButtons />
+        <KindleButtons status={status} />
         {/* <DebugTime now={now} setNow={setNow} /> */}
 
         <Days events={events} now={now} error={eventError !== undefined} />
