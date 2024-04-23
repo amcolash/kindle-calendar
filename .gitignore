@@ -134,3 +134,4 @@ settings.json
 build/
 date.json
 config.xml
+.DS_Store
