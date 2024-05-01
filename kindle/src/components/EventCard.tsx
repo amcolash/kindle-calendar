@@ -102,8 +102,8 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
             <button
               style={{
                 position: 'absolute',
-                top: '0.5rem',
-                right: '0.5rem',
+                top: '1rem',
+                right: '1rem',
                 border: 'none',
                 padding: 0,
                 fontSize: '0.7rem',
@@ -118,7 +118,7 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
               {icon}
             </Twemoji>
 
-            <div style={{ marginTop: '0.25rem', fontSize: '0.65rem' }}>{fullDay ? '[All Day]' : timeLabel}</div>
+            <div style={{ marginTop: '0.25rem', fontSize: '0.85rem' }}>{fullDay ? '[All Day]' : timeLabel}</div>
             <hr />
 
             {event.description && (
@@ -139,14 +139,16 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
                     ? '❓'
                     : '❌';
                 return (
-                  <div>
-                    <span
-                      style={{ marginRight: '0.5rem', width: '1rem', display: 'inline-block', textAlign: 'center' }}
-                    >
-                      {status}
-                    </span>
-                    <span>{attendee.display_name || attendee.email}</span>
-                  </div>
+                  <Twemoji tag="div">
+                    <div>
+                      <span
+                        style={{ marginRight: '0.5rem', width: '1rem', display: 'inline-block', textAlign: 'center' }}
+                      >
+                        {status}
+                      </span>
+                      <span>{attendee.display_name || attendee.email}</span>
+                    </div>
+                  </Twemoji>
                 );
               })}
             </div>
