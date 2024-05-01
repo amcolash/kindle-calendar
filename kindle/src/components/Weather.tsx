@@ -1,7 +1,8 @@
 import 'weather-icons/css/weather-icons.css';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
-import { AQI, Weather as WeatherType } from '../types';
+import { AQI } from '../types/aqi';
+import { Weather as WeatherType } from '../types/weather';
 import { getIcon } from '../util/iconMapping';
 
 interface WeatherProps {

@@ -3,7 +3,9 @@ import { Moment } from 'moment';
 import { useCallback } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
-import { AQI, CronofyEvent, Weather as WeatherType } from '../types';
+import { AQI } from '../types/aqi';
+import { CronofyEvent } from '../types/events';
+import { Weather as WeatherType } from '../types/weather';
 import { UpcomingEvent } from './NextEvent';
 import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';

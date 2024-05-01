@@ -27,7 +27,7 @@ export function KindleButtons(props: KindleButtonsProps) {
         top: 0,
         left: 0,
         width: '100%',
-        height: rotation === Rotation.Portrait ? 250 : 150,
+        height: rotation === Rotation.Portrait ? 110 : 150,
         zIndex: 1,
       }}
       onClick={(e) => {

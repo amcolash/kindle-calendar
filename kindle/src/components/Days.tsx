@@ -1,7 +1,7 @@
 import moment, { Moment } from 'moment-timezone';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
-import { CronofyEvent } from '../types';
+import { CronofyEvent } from '../types/events';
 import { sortEvents } from '../util/util';
 import { EventCard } from './EventCard';
 

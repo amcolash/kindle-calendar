@@ -1,4 +1,4 @@
-import React, { CSSProperties } from 'react';
+import { CSSProperties } from 'react';
 
 import { ReactComponent as Bike } from '../icons/bike.svg';
 import { ReactComponent as Gathertown } from '../icons/gathertown.svg';
@@ -7,7 +7,8 @@ import { ReactComponent as Slack } from '../icons/slack.svg';
 import { ReactComponent as Tada } from '../icons/tada.svg';
 import { ReactComponent as Walk } from '../icons/walk.svg';
 import { ReactComponent as Zoom } from '../icons/zoom.svg';
-import { CronofyEvent, WeatherElement } from '../types';
+import { CronofyEvent } from '../types/events';
+import { WeatherElement } from '../types/weather';
 
 export function getIcon(weather: WeatherElement): string {
   const icon = weather.icon;

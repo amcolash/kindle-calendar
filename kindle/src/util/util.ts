@@ -1,4 +1,4 @@
-import { CronofyEvent } from '../types';
+import { CronofyEvent } from '../types/events';
 
 export const DEBUG = false;
 export const LOCAL_SERVER = false;

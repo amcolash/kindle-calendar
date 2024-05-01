@@ -1,6 +1,6 @@
 import moment, { Moment } from 'moment-timezone';
 
-import { CronofyEvent } from '../types';
+import { CronofyEvent } from '../types/events';
 
 interface UpcomingEventProps {
   events?: CronofyEvent[];
