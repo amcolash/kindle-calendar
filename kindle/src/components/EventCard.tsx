@@ -4,6 +4,7 @@ import Twemoji from 'react-twemoji';
 
 import { CronofyEvent, ParticipationStatusEnum } from '../types/events';
 import { getEventIcon } from '../util/iconMapping';
+import { HEIGHT } from '../util/util';
 
 interface EventCardProps {
   event: CronofyEvent;
@@ -56,10 +57,7 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
           cursor: 'pointer',
         }}
         key={event.event_uid}
-        onClick={() => {
-          setShowModal(true);
-          console.log(event);
-        }}
+        onClick={() => setShowModal(true)}
       >
         <Twemoji tag="span">
           <span style={{ fontWeight: 600 }}>{event.summary}</span>
@@ -91,12 +89,14 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
           <div
             style={{
               position: 'absolute',
-              top: '4rem',
+              top: '3rem',
               left: '0.5rem',
               right: '0.5rem',
               background: 'white',
               borderRadius: '0.5rem',
               padding: '1rem',
+              maxHeight: HEIGHT - 128,
+              overflow: 'auto',
             }}
           >
             <button

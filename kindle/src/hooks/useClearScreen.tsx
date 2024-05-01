@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 
-import { KINDLE } from '../util/util';
+import { HEIGHT, KINDLE, WIDTH } from '../util/util';
 
 export function useClearScreen() {
   const [shouldClear, setShouldClearScreen] = useState(false);
@@ -24,7 +24,7 @@ export function useClearScreen() {
   // Only render clear element on Kindle
   const clearScreenEl = KINDLE && shouldClear && (
     <div
-      style={{ width: '100%', height: 972, background: 'black', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
+      style={{ width: WIDTH, height: HEIGHT, background: 'black', position: 'absolute', top: 0, left: 0, zIndex: 1 }}
     ></div>
   );
 
