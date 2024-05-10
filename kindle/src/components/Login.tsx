@@ -14,13 +14,17 @@ interface LoginProps {
 
 export function loginSpotify(isDocker?: boolean) {
   // localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
-  const endpoint = isDocker ? SERVER : 'http://localhost:3000';
+  // const endpoint = isDocker ? SERVER : 'http://localhost:3000';
+  const endpoint = `${SERVER}/spotify/oauth`;
+
+  let redirect = window.location.origin;
+  if (!redirect.endsWith('/')) redirect += '/';
 
   SpotifyApi.performUserAuthorization(
     SPOTIFY_CLIENT_ID,
-    endpoint,
+    redirect,
     ['user-read-playback-state', 'user-modify-playback-state'],
-    `${endpoint}/spotify/oauth`
+    endpoint,
   );
 }
 
