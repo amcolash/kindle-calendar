@@ -18,7 +18,7 @@ function parseEvents(events: CronofyEvent[], now: Moment) {
     const duration = Math.ceil(end.diff(start, 'days', true));
 
     if (duration > 1) {
-      console.log(event.summary, start.toLocaleString(), end.toLocaleString(), duration);
+      // console.log(event.summary, start.toLocaleString(), end.toLocaleString(), duration);
       for (let i = 0; i <= duration; i++) {
         const day = start.clone().add(i, 'day');
         const dayStart = day.clone().startOf('day');
@@ -28,7 +28,7 @@ function parseEvents(events: CronofyEvent[], now: Moment) {
           const key = day.format(dayFormat);
 
           days[key] = days[key] || [];
-          days[key].push(event);
+          days[key].push({ ...event, summary: `${event.summary} (${i + 1} / ${duration + 1})` });
         }
       }
     } else {

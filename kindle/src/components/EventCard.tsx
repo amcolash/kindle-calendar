@@ -135,7 +135,8 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
                 const status =
                   attendee.status === ParticipationStatusEnum.Accepted
                     ? '✅'
-                    : attendee.status === ParticipationStatusEnum.Tentative
+                    : attendee.status === ParticipationStatusEnum.Tentative ||
+                      attendee.status === ParticipationStatusEnum.NeedsAction
                     ? '❓'
                     : '❌';
                 return (
