@@ -65,7 +65,7 @@ export function App() {
   if (rotation === Rotation.Portrait) containerHeight = HEIGHT - playbarOffset;
 
   if (loadingStatus || !status) return <div style={{ textAlign: 'center', marginTop: playbarOffset }}>Loading...</div>;
-  if (!status.cronofy || !status.spotify) return <Login status={status} />;
+  if (!status.cronofy) return <Login status={status} />;
 
   return (
     <>
