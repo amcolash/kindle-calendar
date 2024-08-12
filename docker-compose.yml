@@ -6,8 +6,8 @@ services:
     container_name: kindle-calendar
     restart: unless-stopped
     network_mode: 'host'
-    env_file: .env
+    env_file: ./server/.env
     volumes:
       - /etc/localtime:/etc/localtime:ro
-      - ./.cert:/usr/src/app/.cert:ro
-      - ./settings.json:/usr/src/app/settings.json
+      - ./server/.cert:/usr/src/app/.cert:ro
+      - ./server/settings.json:/usr/src/app/settings.json

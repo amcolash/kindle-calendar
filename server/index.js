@@ -137,6 +137,11 @@ server2.listen(PORT + 1, '0.0.0.0', () => {
   console.log(`Server (http) listening on port ${PORT + 1}`);
 });
 
+if (existsSync('./kindle/build')) {
+  console.log('Serving kindle app from ./kindle/build');
+  app.use(express.static('./kindle/build'));
+}
+
 app.get('/status', (req, res) => {
   res.send({
     cronofy: CRONOFY_CLIENT_REFRESH_TOKEN !== undefined,
