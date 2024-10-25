@@ -214,7 +214,7 @@ export function getEventIcon(event: CronofyEvent): JSX.Element | null {
 
   if (summary.includes('chiro') || summary.includes('massage')) return <Bike style={iconStyle} />;
   if (summary.includes('pt')) return <Walk style={iconStyle} />;
-  if (summary.includes('mha')) return <Tada style={iconStyle} />;
+  if (summary.includes('mha') || summary.includes('project time')) return <Tada style={iconStyle} />;
 
   if (summary.includes('gathertown')) return <Gathertown style={iconStyle} />;
   if (summary.includes('standup')) return <Slack style={iconStyle} />;
