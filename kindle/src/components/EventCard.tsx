@@ -22,7 +22,6 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
   const dayEnd = currentDay.clone().endOf('day');
 
   const fullDay = start.isSameOrBefore(dayStart) && end.isSameOrAfter(dayEnd);
-  const currentlyHappening = end.diff(start, 'hours') < 23 && now.isBetween(start, end, 'minute', '[]');
 
   // Special All Day Start/Ends
   if (!fullDay && end.diff(start, 'hours') > 23) {
@@ -35,14 +34,20 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
   // Build label for start/end when it is not a full day event
   const startLabel = start && !end ? '[All Day] Begins ' : '';
   const startTime = start?.format('h:mm A') || '';
-  const startTimeEt = start?.tz('America/New_York').format('h:mm A') || '';
+  const startTimeEt = start?.clone().tz('America/New_York').format('h:mm A') || '';
   const noLabel = start && end ? ' - ' : '';
   const endLabel = !start && end ? '[All Day] Until ' : '';
   const endTime = end?.format('h:mm A') || '';
-  const endTimeEt = end?.tz('America/New_York').format('h:mm A') || '';
+  const endTimeEt = end?.clone().tz('America/New_York').format('h:mm A') || '';
+
+  const leaveBy = event.summary.toLowerCase().includes('chiro') ? start?.clone().subtract(20, 'minutes') : undefined;
+  const leaveByLabel = leaveBy ? `[Leave by ${leaveBy?.format('h:mm A')}]` : '';
 
   const timeLabel = `${startLabel}${startTime}${noLabel}${endLabel}${endTime}`;
   const easternTimeLabel = `${startLabel}${startTimeEt}${noLabel}${endLabel}${endTimeEt} (ET)`;
+
+  const currentlyHappening =
+    (end?.diff(start, 'hours') || 0) < 23 && now?.isBetween(leaveBy || start, end, 'minute', '[]');
 
   return (
     <>
@@ -67,9 +72,12 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
 
         <div style={{ position: 'relative' }}>
           <div style={{ marginTop: '0.25rem' }}>{fullDay ? '[All Day]' : timeLabel}</div>
-          <div style={{ position: 'absolute', bottom: '0.25rem', right: 0, fontSize: 20 }}>
+          <div style={{ position: 'absolute', top: '0.25rem', right: 0, fontSize: 20 }}>
             {fullDay ? '[All Day]' : easternTimeLabel}
           </div>
+          {event.summary.toLowerCase().includes('chiro') && (
+            <div style={{ marginTop: '0.25rem', fontWeight: 'bold' }}>{leaveByLabel}</div>
+          )}
         </div>
       </div>
 
