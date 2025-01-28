@@ -1,5 +1,4 @@
 import { Moment } from 'moment';
-import { useCallback } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { SpotifyStatus } from '../types';
@@ -32,20 +31,6 @@ export function StatusContainer({
   const { rotation } = useRotationContext();
   const playState: 'playing' | 'paused' | 'idle' = playbackState?.state || 'idle';
 
-  const MusicWeather = useCallback(
-    ({ weather, aqi }: { weather?: WeatherType; aqi?: AQI }) => (
-      <div style={{ overflow: 'auto' }}>
-        <NowPlaying
-          playbackState={playbackState}
-          error={playbackError !== undefined}
-          updatePlaybackState={updatePlaybackState}
-        />
-        <Weather isPlaying={playState !== 'idle'} weather={weather} aqi={aqi} />
-      </div>
-    ),
-    [playState, playbackState, playbackError, updatePlaybackState]
-  );
-
   return (
     <div
       style={{
@@ -62,7 +47,15 @@ export function StatusContainer({
         // display: 'table',
       }}
     >
-      <MusicWeather weather={weather} aqi={aqi} />
+      <div style={{ overflow: 'auto' }}>
+        <NowPlaying
+          playbackState={playbackState}
+          error={playbackError !== undefined}
+          updatePlaybackState={updatePlaybackState}
+        />
+        <Weather isPlaying={playState !== 'idle'} weather={weather} aqi={aqi} />
+      </div>
+
       <UpcomingEvent events={events} now={now} />
     </div>
   );

@@ -47,10 +47,10 @@ const landscapeCoverStyle: React.CSSProperties = {
 export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPlayingProps) {
   const { rotation } = useRotationContext();
 
-  const [playState, setPlayState] = React.useState(playbackState?.state);
+  const [playState, setPlayState] = React.useState(playbackState?.state || 'idle');
 
   useEffect(() => {
-    setPlayState(playbackState?.state || 'idle');
+    if (playbackState) setPlayState(playbackState.state || 'idle');
   }, [playbackState]);
 
   const Container = (props: any) => {
@@ -111,7 +111,7 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
           <img
             src={playState === 'playing' ? PauseIcon : PlayIcon}
             onClick={() => {
-              delay(() => setPlayState(playState === 'playing' ? 'paused' : 'playing'), KINDLE ? 1500 : 0);
+              delay(() => setPlayState(playState === 'playing' ? 'paused' : 'playing'), KINDLE ? 500 : 0);
               fetch(`${SERVER}/spotify/play_pause`).then(() => updatePlaybackState());
             }}
             style={imgStyle}
