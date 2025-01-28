@@ -1,15 +1,15 @@
-import { PlaybackState, Track } from '@spotify/web-api-ts-sdk';
-import React from 'react';
+import React, { useEffect } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { ReactComponent as MusicIcon } from '../icons/music.svg';
 import PauseIcon from '../icons/pause.png';
 import PlayIcon from '../icons/play.png';
 import SkipIcon from '../icons/skip.png';
+import { SpotifyStatus } from '../types';
 import { KINDLE, SERVER, delay } from '../util/util';
 
 interface NowPlayingProps {
-  playbackState?: PlaybackState;
+  playbackState?: SpotifyStatus;
   error: boolean;
   updatePlaybackState: () => void;
 }
@@ -47,6 +47,12 @@ const landscapeCoverStyle: React.CSSProperties = {
 export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPlayingProps) {
   const { rotation } = useRotationContext();
 
+  const [playState, setPlayState] = React.useState(playbackState?.state);
+
+  useEffect(() => {
+    setPlayState(playbackState?.state || 'idle');
+  }, [playbackState]);
+
   const Container = (props: any) => {
     if (rotation === Rotation.Portrait) return <div style={{ float: 'left', maxWidth: '81%' }} {...props}></div>;
     else return <div style={{ textAlign: 'center', display: 'table-row', height: '100%' }} {...props}></div>;
@@ -59,7 +65,7 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
       </Container>
     );
 
-  if (!playbackState || !playbackState.item) {
+  if (!playbackState || playState === 'idle') {
     if (rotation === Rotation.Portrait)
       return (
         <Container>
@@ -85,7 +91,6 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
       );
   }
 
-  const track = playbackState.item as Track;
   return (
     <Container>
       <div
@@ -98,30 +103,20 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
         }}
       >
         <img
-          src={track.album.images[0].url}
+          src={playbackState.attributes.entity_picture}
           style={rotation === Rotation.Portrait ? portraitCoverStyle : landscapeCoverStyle}
           alt="album cover"
         />
         <button style={iconStyle}>
-          {playbackState.is_playing ? (
-            <img
-              src={PauseIcon}
-              onClick={() =>
-                fetch(`${SERVER}/spotify/pause`).then(() => delay(updatePlaybackState, KINDLE ? 1500 : 500))
-              }
-              style={imgStyle}
-              alt="pause"
-            />
-          ) : (
-            <img
-              src={PlayIcon}
-              onClick={() =>
-                fetch(`${SERVER}/spotify/play`).then(() => delay(updatePlaybackState, KINDLE ? 1500 : 500))
-              }
-              style={imgStyle}
-              alt="play"
-            />
-          )}
+          <img
+            src={playState === 'playing' ? PauseIcon : PlayIcon}
+            onClick={() => {
+              setPlayState(playState === 'playing' ? 'paused' : 'playing');
+              fetch(`${SERVER}/spotify/play_pause`).then(() => delay(updatePlaybackState, KINDLE ? 1500 : 500));
+            }}
+            style={imgStyle}
+            alt={playState === 'playing' ? 'pause' : 'play'}
+          />
         </button>
         <button style={{ ...iconStyle, left: undefined, right: '0.35rem' }}>
           <img
@@ -152,15 +147,10 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
             WebkitLineClamp: 2,
           }}
         >
-          {track.name}
+          {playbackState.attributes.media_title}
         </span>
 
-        <span style={{ color: 'grey', fontSize: '1.1rem' }}>
-          {track.artists
-            .slice(0, 3)
-            .map((a) => a.name)
-            .join(', ')}
-        </span>
+        <span style={{ color: 'grey', fontSize: '1.1rem' }}>{playbackState.attributes.media_artist}</span>
       </div>
     </Container>
   );

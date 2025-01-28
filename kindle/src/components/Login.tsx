@@ -1,6 +1,4 @@
-import { SpotifyApi } from '@spotify/web-api-ts-sdk';
-
-import { SERVER, SPOTIFY_CLIENT_ID } from '../util/util';
+import { SERVER } from '../util/util';
 
 export interface Status {
   cronofy?: boolean;
@@ -10,22 +8,6 @@ export interface Status {
 
 interface LoginProps {
   status?: Status;
-}
-
-export function loginSpotify(isDocker?: boolean) {
-  // localStorage.removeItem('spotify-sdk:AuthorizationCodeWithPKCEStrategy:token');
-  // const endpoint = isDocker ? SERVER : 'http://localhost:3000';
-  const endpoint = `${SERVER}/spotify/oauth`;
-
-  let redirect = window.location.origin;
-  if (!redirect.endsWith('/')) redirect += '/';
-
-  SpotifyApi.performUserAuthorization(
-    SPOTIFY_CLIENT_ID,
-    redirect,
-    ['user-read-playback-state', 'user-modify-playback-state'],
-    endpoint,
-  );
 }
 
 export function Login({ status }: LoginProps) {
@@ -47,23 +29,6 @@ export function Login({ status }: LoginProps) {
         <div style={{ width: '15rem' }}>
           Server is {SERVER}
           {!status?.cronofy && <div>LOGIN TO CRONOFY</div>}
-          {!status?.spotify && (
-            <button
-              onClick={() => loginSpotify(status?.docker)}
-              style={{
-                marginTop: '1rem',
-                height: '2.5rem',
-                width: '100%',
-                borderRadius: '2rem',
-                border: 'none',
-                background: '	#1DB954',
-                color: 'white',
-                fontSize: '0.75rem',
-              }}
-            >
-              Log in with Spotify
-            </button>
-          )}
         </div>
       </div>
     </>

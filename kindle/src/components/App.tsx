@@ -1,4 +1,3 @@
-import { PlaybackState } from '@spotify/web-api-ts-sdk';
 // import { DateTime } from 'luxon';
 import { useEffect, useState } from 'react';
 
@@ -6,6 +5,7 @@ import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { useClearScreen } from '../hooks/useClearScreen';
 import { useData } from '../hooks/useData';
 import { useRerender } from '../hooks/useRerender';
+import { SpotifyStatus } from '../types';
 import { AQI } from '../types/aqi';
 import { CronofyEvent } from '../types/events';
 import { Weather } from '../types/weather';
@@ -13,7 +13,7 @@ import { HEIGHT, SERVER } from '../util/util';
 import { Days } from './Days';
 // import { DebugTime } from './DebugTime';
 import { KindleButtons } from './KindleButtons';
-import { Login, Status, loginSpotify } from './Login';
+import { Login, Status } from './Login';
 import { StatusContainer } from './StatusContainer';
 
 export function App() {
@@ -30,7 +30,7 @@ export function App() {
     data: playbackState,
     error: playbackError,
     forceUpdate: updatePlaybackState,
-  } = useData<PlaybackState>(`${SERVER}/spotify/now-playing`, playbackUpdate);
+  } = useData<SpotifyStatus>(`${SERVER}/spotify/now-playing`, playbackUpdate);
 
   useRerender(60 * 1000); // Refresh ui on page every minute, on the minute (this updates upcoming events + currently highlighted events)
 
@@ -38,30 +38,15 @@ export function App() {
   // const now = dayjs().format('YYYY-MM-DDTHH:mm');
   // const [now, setNow] = useState(DateTime.now().toFormat('YYYY-MM-DDTHH:mm'));
 
-  const isPlaying: 'playing' | 'paused' | 'stopped' = playbackState?.is_playing
-    ? 'playing'
-    : playbackState?.is_playing === undefined
-    ? 'stopped'
-    : 'paused';
+  const playState: 'playing' | 'paused' | 'idle' = playbackState?.state || 'idle';
 
   useEffect(() => {
-    if (window.location.search.includes('code=')) loginSpotify(status?.docker);
-
-    let timeout: NodeJS.Timeout;
-    if (!loadingStatus && !status) timeout = setTimeout(() => window.location.reload(), 15 * 1000);
-
-    return () => {
-      if (timeout) clearTimeout(timeout);
-    };
-  }, [status, loadingStatus]);
-
-  useEffect(() => {
-    if (isPlaying === 'playing') setPlaybackUpdate(10 * 1000);
+    if (playState === 'playing') setPlaybackUpdate(10 * 1000);
     else setPlaybackUpdate(60 * 1000);
-  }, [isPlaying]);
+  }, [playState]);
 
   let containerHeight;
-  const playbarOffset = isPlaying === 'stopped' ? 212 : 362;
+  const playbarOffset = playState === 'idle' ? 212 : 362;
   if (rotation === Rotation.Portrait) containerHeight = HEIGHT - playbarOffset;
 
   if (loadingStatus || !status) return <div style={{ textAlign: 'center', marginTop: playbarOffset }}>Loading...</div>;
@@ -78,7 +63,7 @@ export function App() {
           // WebkitTransform: rotation === Rotation.Portrait ? undefined : 'rotate(90deg)',
         }}
       >
-        <KindleButtons status={status} />
+        <KindleButtons />
         {/* <DebugTime now={now} setNow={setNow} /> */}
 
         <Days events={events} now={now} error={eventError !== undefined} />

@@ -1,8 +1,8 @@
-import { PlaybackState } from '@spotify/web-api-ts-sdk';
 import { Moment } from 'moment';
 import { useCallback } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
+import { SpotifyStatus } from '../types';
 import { AQI } from '../types/aqi';
 import { CronofyEvent } from '../types/events';
 import { Weather as WeatherType } from '../types/weather';
@@ -11,7 +11,7 @@ import { NowPlaying } from './NowPlaying';
 import { Weather } from './Weather';
 
 interface StatusContainerProps {
-  playbackState?: PlaybackState;
+  playbackState?: SpotifyStatus;
   playbackError?: unknown;
   updatePlaybackState: () => void;
   events?: CronofyEvent[];
@@ -30,11 +30,7 @@ export function StatusContainer({
   aqi,
 }: StatusContainerProps) {
   const { rotation } = useRotationContext();
-  const isPlaying: 'playing' | 'paused' | 'stopped' = playbackState?.is_playing
-    ? 'playing'
-    : playbackState?.is_playing === undefined
-    ? 'stopped'
-    : 'paused';
+  const playState: 'playing' | 'paused' | 'idle' = playbackState?.state || 'idle';
 
   const MusicWeather = useCallback(
     ({ weather, aqi }: { weather?: WeatherType; aqi?: AQI }) => (
@@ -44,10 +40,10 @@ export function StatusContainer({
           error={playbackError !== undefined}
           updatePlaybackState={updatePlaybackState}
         />
-        <Weather isPlaying={isPlaying !== 'stopped'} weather={weather} aqi={aqi} />
+        <Weather isPlaying={playState !== 'idle'} weather={weather} aqi={aqi} />
       </div>
     ),
-    [isPlaying, playbackState, playbackError, updatePlaybackState]
+    [playState, playbackState, playbackError, updatePlaybackState]
   );
 
   return (

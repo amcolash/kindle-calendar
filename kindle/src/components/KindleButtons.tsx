@@ -3,7 +3,6 @@ import { useState } from 'react';
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { KINDLE } from '../util/util';
 import { KindleAPI } from './Kindle';
-import { Status, loginSpotify } from './Login';
 
 const buttonStyle: React.CSSProperties = {
   display: 'block',
@@ -12,11 +11,7 @@ const buttonStyle: React.CSSProperties = {
   marginBottom: '0.45rem',
 };
 
-interface KindleButtonsProps {
-  status?: Status;
-}
-
-export function KindleButtons(props: KindleButtonsProps) {
+export function KindleButtons() {
   const [showButtons, setShowButtons] = useState(false);
   const { rotation, setRotation } = useRotationContext();
 
@@ -54,9 +49,6 @@ export function KindleButtons(props: KindleButtonsProps) {
             onClick={() => setRotation(rotation === Rotation.Portrait ? Rotation.Landscape : Rotation.Portrait)}
           >
             Rotate ({rotation})
-          </button>
-          <button style={buttonStyle} onClick={() => loginSpotify(props.status?.docker)}>
-            Spotify Re-login
           </button>
           <button
             style={buttonStyle}
