@@ -1,4 +1,3 @@
-const { SpotifyApi } = require('@spotify/web-api-ts-sdk');
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const { CronJob } = require('cron');
@@ -19,10 +18,11 @@ const TIMEZONE = 'America/Los_Angeles';
 Settings.defaultZone = TIMEZONE;
 
 const {
-  SPOTIFY_CLIENT_ID,
   OPEN_WEATHER_KEY,
   HOME_ASSISTANT_URL,
   HOME_ASSISTANT_KEY,
+  HOME_ASSISTANT_AQI,
+  HOME_ASSISTANT_SPOTIFY,
   CRONOFY_CLIENT_ID,
   CRONOFY_CLIENT_SECRET,
   CRONOFY_CLIENT_REFRESH_TOKEN,
@@ -31,7 +31,6 @@ const {
 try {
   nconf.use('file', { file: './settings.json' });
   nconf.defaults({
-    spotify_access_token: undefined,
     cronofy_access_token: undefined,
   });
 
@@ -40,15 +39,8 @@ try {
   console.error(err);
 }
 
-let SPOTIFY_ACCESS_TOKEN = nconf.get('spotify_access_token');
-if (SPOTIFY_ACCESS_TOKEN && !SPOTIFY_ACCESS_TOKEN.expires) SPOTIFY_ACCESS_TOKEN = undefined;
-
 const PORT = process.env.PORT ? Number.parseInt(process.env.PORT) : 8501;
-const clientUrl = `http://localhost:${3000}`;
-
 let cronofyClient;
-let spotifySdk;
-let currentDeviceId;
 
 // HTTPS setup
 const credentials = {};
@@ -75,15 +67,18 @@ app.use(bodyParser.json());
 const server = createServerHttps(credentials, app);
 const server2 = createServer(app);
 
-if (!SPOTIFY_CLIENT_ID) console.error('Missing env var: SPOTIFY_CLIENT_ID');
 if (!OPEN_WEATHER_KEY) console.error('Missing env var: OPEN_WEATHER_KEY');
 if (!HOME_ASSISTANT_URL) console.error('Missing env var: HOME_ASSISTANT_URL');
 if (!HOME_ASSISTANT_KEY) console.error('Missing env var: HOME_ASSISTANT_KEY');
+if (!HOME_ASSISTANT_AQI) console.error('Missing env var: HOME_ASSISTANT_AQI');
+if (!HOME_ASSISTANT_SPOTIFY) console.error('Missing env var: HOME_ASSISTANT_SPOTIFY');
 if (!CRONOFY_CLIENT_ID) console.error('Missing env var: CRONOFY_CLIENT_ID');
 if (!CRONOFY_CLIENT_SECRET) console.error('Missing env var: CRONOFY_CLIENT_SECRET');
 if (!CRONOFY_CLIENT_REFRESH_TOKEN) console.error('Missing env var: CRONOFY_CLIENT_REFRESH_TOKEN');
 
-if (!SPOTIFY_CLIENT_ID || !OPEN_WEATHER_KEY || !HOME_ASSISTANT_URL || !HOME_ASSISTANT_KEY) process.exit(1);
+if (!OPEN_WEATHER_KEY || !HOME_ASSISTANT_URL || !HOME_ASSISTANT_KEY) process.exit(1);
+
+const SPOTIFY_ENTITY_ID = HOME_ASSISTANT_SPOTIFY?.replace('states/', '').trim();
 
 // Set up access/refresh tokens
 if (CRONOFY_CLIENT_ID && CRONOFY_CLIENT_SECRET && CRONOFY_CLIENT_REFRESH_TOKEN) {
@@ -100,29 +95,8 @@ if (CRONOFY_CLIENT_ID && CRONOFY_CLIENT_SECRET && CRONOFY_CLIENT_REFRESH_TOKEN) 
   );
 }
 
-if (SPOTIFY_ACCESS_TOKEN) {
-  makeSpotifySdk(SPOTIFY_ACCESS_TOKEN);
-} else {
-  console.error(
-    `No spotify access token found, you must authenticate at http://localhost:${PORT}/spotify-oauth before using spotify endpoints`
-  );
-}
-
 // Refresh tokens every hour
-new CronJob(
-  '0 * * * *',
-  function () {
-    refreshCronofyToken();
-
-    if (spotifySdk)
-      spotifySdk.getAccessToken().then((token) => {
-        makeSpotifySdk(token);
-      });
-  },
-  null,
-  true,
-  TIMEZONE
-);
+new CronJob('0 * * * *', () => refreshCronofyToken(), null, true, TIMEZONE);
 
 app.use(cors());
 app.use(express.json());
@@ -145,7 +119,6 @@ if (existsSync('./kindle/build')) {
 app.get('/status', (req, res) => {
   res.send({
     cronofy: CRONOFY_CLIENT_REFRESH_TOKEN !== undefined,
-    spotify: SPOTIFY_ACCESS_TOKEN !== undefined,
     docker: IS_DOCKER,
   });
 });
@@ -163,89 +136,52 @@ app.get('/events', async (req, res) => {
     .catch((err) => res.send(err));
 });
 
-app.post('/spotify/oauth', (req, res) => {
-  makeSpotifySdk(req.body);
-  res.redirect(clientUrl);
-});
-
 app.get('/spotify/now-playing', (req, res) => {
-  if (spotifySdk) {
-    spotifySdk.player
-      .getPlaybackState()
-      .then((data) => {
-        if (data) currentDeviceId = data.device.id;
-        else currentDeviceId = undefined;
+  fetchWithTimeout(HOME_ASSISTANT_URL + HOME_ASSISTANT_SPOTIFY, {
+    headers: { Authorization: `Bearer ${HOME_ASSISTANT_KEY}` },
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      if (data.attributes.entity_picture)
+        data.attributes.entity_picture = HOME_ASSISTANT_URL + data.attributes.entity_picture.replace('/api/', '');
 
-        // console.log(data);
-        res.send(data || {});
-      })
-      .catch((err) => {
-        console.error(err);
-        res.sendStatus(500);
-
-        if (err.toString().includes('Refresh token revoked') || err.toString().includes('Bad or expired token')) {
-          makeSpotifySdk(undefined);
-        }
-      });
-
-    return;
-  }
-
-  res.sendStatus(401);
+      res.send(data);
+    })
+    .catch((err) => {
+      res.status(500).send(err);
+    });
 });
 
-app.get('/spotify/play', (req, res) => {
-  if (spotifySdk && currentDeviceId) {
-    spotifySdk.player
-      .startResumePlayback(currentDeviceId)
-      .then((data) => {
-        res.send(data);
-      })
-      .catch((err) => {
-        console.error(err);
-        res.sendStatus(500);
-      });
-
-    return;
-  }
-
-  res.sendStatus(401);
-});
-
-app.get('/spotify/pause', (req, res) => {
-  if (spotifySdk && currentDeviceId) {
-    spotifySdk.player
-      .pausePlayback(currentDeviceId)
-      .then((data) => {
-        res.send(data);
-      })
-      .catch((err) => {
-        console.error(err);
-        res.sendStatus(500);
-      });
-
-    return;
-  }
-
-  res.sendStatus(401);
+app.get('/spotify/play_pause', (req, res) => {
+  fetchWithTimeout(HOME_ASSISTANT_URL + 'services/media_player/media_play_pause', {
+    headers: { Authorization: `Bearer ${HOME_ASSISTANT_KEY}` },
+    method: 'POST',
+    body: JSON.stringify({ entity_id: SPOTIFY_ENTITY_ID }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send(err);
+    });
 });
 
 app.get('/spotify/skip', (req, res) => {
-  if (spotifySdk && currentDeviceId) {
-    spotifySdk.player
-      .skipToNext(currentDeviceId)
-      .then((data) => {
-        res.send(data);
-      })
-      .catch((err) => {
-        console.error(err);
-        res.sendStatus(500);
-      });
-
-    return;
-  }
-
-  res.sendStatus(401);
+  fetchWithTimeout(HOME_ASSISTANT_URL + 'services/media_player/media_next_track', {
+    headers: { Authorization: `Bearer ${HOME_ASSISTANT_KEY}` },
+    method: 'POST',
+    body: JSON.stringify({ entity_id: SPOTIFY_ENTITY_ID }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      res.send(data);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send(err);
+    });
 });
 
 let weatherCache = { lastUpdated: 0, data: {} };
@@ -280,7 +216,9 @@ app.get('/aqi', (req, res) => {
     return;
   }
 
-  fetchWithTimeout(HOME_ASSISTANT_URL, { headers: { Authorization: `Bearer ${HOME_ASSISTANT_KEY}` } })
+  fetchWithTimeout(HOME_ASSISTANT_URL + HOME_ASSISTANT_AQI, {
+    headers: { Authorization: `Bearer ${HOME_ASSISTANT_KEY}` },
+  })
     .then((res) => res.json())
     .then((data) => {
       res.send(data);
@@ -292,19 +230,6 @@ app.get('/aqi', (req, res) => {
 });
 
 // Functions
-function makeSpotifySdk(token) {
-  if (SPOTIFY_CLIENT_ID) {
-    SPOTIFY_ACCESS_TOKEN = token;
-
-    if (token && token.expires) spotifySdk = SpotifyApi.withAccessToken(SPOTIFY_CLIENT_ID, SPOTIFY_ACCESS_TOKEN);
-    else spotifySdk = undefined;
-
-    nconf.set('spotify_access_token', token?.expires === -1 ? undefined : token);
-    nconf.save((err) => {
-      if (err) console.error(err);
-    });
-  }
-}
 
 function refreshCronofyToken() {
   cronofyClient.refreshAccessToken().catch((err) => {

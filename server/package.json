@@ -8,7 +8,6 @@
     "start:docker": "node index.js"
   },
   "dependencies": {
-    "@spotify/web-api-ts-sdk": "^1.1.2",
     "cors": "^2.8.5",
     "cron": "^3.1.6",
     "cronofy": "^3.8.1",
