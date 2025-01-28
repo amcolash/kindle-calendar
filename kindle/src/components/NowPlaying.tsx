@@ -111,8 +111,8 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
           <img
             src={playState === 'playing' ? PauseIcon : PlayIcon}
             onClick={() => {
-              setPlayState(playState === 'playing' ? 'paused' : 'playing');
-              fetch(`${SERVER}/spotify/play_pause`).then(() => delay(updatePlaybackState, KINDLE ? 1500 : 500));
+              delay(() => setPlayState(playState === 'playing' ? 'paused' : 'playing'), KINDLE ? 1500 : 0);
+              fetch(`${SERVER}/spotify/play_pause`).then(() => updatePlaybackState());
             }}
             style={imgStyle}
             alt={playState === 'playing' ? 'pause' : 'play'}
