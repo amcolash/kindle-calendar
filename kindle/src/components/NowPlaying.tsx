@@ -150,7 +150,19 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
           {playbackState.attributes.media_title}
         </span>
 
-        <span style={{ color: 'grey', fontSize: '1.1rem' }}>{playbackState.attributes.media_artist}</span>
+        <span
+          style={{
+            color: 'grey',
+            fontSize: '1.1rem',
+            maxHeight: '4rem',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: 'block',
+            WebkitLineClamp: 2,
+          }}
+        >
+          {playbackState.attributes.media_artist}
+        </span>
       </div>
     </Container>
   );
