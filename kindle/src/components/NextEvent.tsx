@@ -12,6 +12,8 @@ export function UpcomingEvent({ events, now = moment() }: UpcomingEventProps) {
 
   const filteredEvents = events
     .filter((event) => {
+      if (!event) return false;
+
       const start = moment(event.start);
       const end = moment(event.end);
 

@@ -12,33 +12,35 @@ function parseEvents(events: CronofyEvent[], now: Moment) {
 
   // Group events by day, and filter out events that have already ended
   const days: { [key: string]: CronofyEvent[] } = {};
-  events.forEach((event) => {
-    const start = moment(event.start);
-    const end = moment(event.end);
-    const duration = Math.ceil(end.diff(start, 'days', true));
+  events
+    .filter((e) => e)
+    .forEach((event) => {
+      const start = moment(event.start);
+      const end = moment(event.end);
+      const duration = Math.ceil(end.diff(start, 'days', true));
 
-    if (duration > 1) {
-      // console.log(event.summary, start.toLocaleString(), end.toLocaleString(), duration);
-      for (let i = 0; i <= duration; i++) {
-        const day = start.clone().add(i, 'day');
-        const dayStart = day.clone().startOf('day');
+      if (duration > 1) {
+        // console.log(event.summary, start.toLocaleString(), end.toLocaleString(), duration);
+        for (let i = 0; i <= duration; i++) {
+          const day = start.clone().add(i, 'day');
+          const dayStart = day.clone().startOf('day');
 
-        // Only add days that are now or in the future
-        if (dayStart >= nowStart && !end.isSame(dayStart)) {
-          const key = day.format(dayFormat);
+          // Only add days that are now or in the future
+          if (dayStart >= nowStart && !end.isSame(dayStart)) {
+            const key = day.format(dayFormat);
 
+            days[key] = days[key] || [];
+            days[key].push({ ...event, summary: `${event.summary} (${i + 1} / ${duration + 1})` });
+          }
+        }
+      } else {
+        const key = start.format(dayFormat);
+        if (now <= end) {
           days[key] = days[key] || [];
-          days[key].push({ ...event, summary: `${event.summary} (${i + 1} / ${duration + 1})` });
+          if (now < end) days[key].push(event);
         }
       }
-    } else {
-      const key = start.format(dayFormat);
-      if (now <= end) {
-        days[key] = days[key] || [];
-        if (now < end) days[key].push(event);
-      }
-    }
-  });
+    });
 
   // Sort days by date, and sort events within each day
   const dayList = Object.entries(days).map((e) => {

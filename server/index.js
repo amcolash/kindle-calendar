@@ -125,15 +125,24 @@ app.get('/status', (req, res) => {
 
 app.get('/events', async (req, res) => {
   const today = DateTime.now().startOf('day');
-  const future = today.plus({ days: 1 }).endOf('day'); // one day in the future
+  const future = today.plus({ days: 2 }).endOf('day'); // 2 days in the future
 
   cronofyClient
-    .readEvents({ from: today.toISODate(), to: future.plus({ days: 1 }).toISODate(), tzid: TIMEZONE }) // to is exclusive, so add a day
+    .readEvents({ from: today.toISODate(), to: future.toISODate(), tzid: TIMEZONE })
     .then((data) => {
-      const filtered = data.events.filter((e) => e.participation_status !== 'declined');
-      res.send(filtered);
+      const events = new Map();
+
+      data.events.forEach((e) => {
+        const id = e.summary + e.start + e.end;
+        if (!events.has(id) && e.participation_status !== 'declined') events.set(id, e);
+      });
+
+      res.send(Array.from(events.values()));
     })
-    .catch((err) => res.send(err));
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send([]);
+    });
 });
 
 app.get('/spotify/now-playing', (req, res) => {
