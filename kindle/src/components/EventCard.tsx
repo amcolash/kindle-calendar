@@ -85,13 +85,13 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
         <div
           onClick={() => setShowModal(false)}
           style={{
-            position: 'absolute',
+            position: 'fixed',
             background: 'rgba(0,0,0,0.5)',
             top: 0,
             bottom: 0,
             left: 0,
             right: 0,
-            zIndex: 1,
+            zIndex: 2,
           }}
         >
           <div
@@ -114,7 +114,7 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
                 right: '1rem',
                 border: 'none',
                 padding: 0,
-                fontSize: '0.7rem',
+                fontSize: '0.75rem',
               }}
               onClick={() => setShowModal(false)}
             >

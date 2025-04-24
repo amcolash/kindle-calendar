@@ -32,7 +32,7 @@
     "serve": "serve -s build -l 4000",
     "deploy": "echo { \\\"date\\\": \\\"$(date)\\\" } > public/date.json && npm run build && npm run sync",
     "sync": "rsync -azvv --no-perms --no-owner --no-group --delete build/com.amcolash.kindle_dashboard kindle:/mnt/us/extensions",
-    "watch": "nodemon --exec 'npm run deploy' --watch src --watch scripts -e tsx,ts,jsx,js,css,xml,sh",
+    "watch": "nodemon --exec 'npm run deploy' --watch src --watch scripts -e tsx,ts,jsx,js,css,xml,sh,svg,png",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {

@@ -1,8 +1,8 @@
 import { useState } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
+import { KindleAPI } from '../util/kindle';
 import { KINDLE } from '../util/util';
-import { KindleAPI } from './Kindle';
 
 const buttonStyle: React.CSSProperties = {
   display: 'block',

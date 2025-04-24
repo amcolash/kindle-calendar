@@ -1,7 +1,6 @@
-// import { DateTime } from 'luxon';
+import moment from 'moment';
 import { useEffect, useRef, useState } from 'react';
 
-import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { useClearScreen } from '../hooks/useClearScreen';
 import { useData } from '../hooks/useData';
 import { useRerender } from '../hooks/useRerender';
@@ -21,7 +20,6 @@ import { StatusContainer } from './StatusContainer';
 
 export function App() {
   const { clearScreenEl } = useClearScreen(); // Clear screen every 15 minutes
-  const { rotation } = useRotationContext();
 
   const containerRef = useRef<HTMLDivElement>(null);
   const scroll = useScrollPosition(containerRef.current);
@@ -42,9 +40,7 @@ export function App() {
 
   useRerender(60 * 1000); // Refresh ui on page every minute, on the minute (this updates upcoming events + currently highlighted events)
 
-  let now;
-  // const now = dayjs().format('YYYY-MM-DDTHH:mm');
-  // const [now, setNow] = useState(DateTime.now().toFormat('YYYY-MM-DDTHH:mm'));
+  const now = moment();
 
   const playState: 'playing' | 'paused' | 'idle' = playbackState?.state || 'idle';
 
@@ -53,10 +49,8 @@ export function App() {
     else setPlaybackUpdate(60 * 1000);
   }, [playState]);
 
-  let containerHeight;
-  // const playbarOffset = playState === 'idle' ? 212 : 362;
   const playbarOffset = statusRef.current?.clientHeight || 0;
-  if (rotation === Rotation.Portrait) containerHeight = HEIGHT - playbarOffset;
+  let containerHeight = HEIGHT - playbarOffset;
 
   if (loadingStatus || !status) return <div style={{ textAlign: 'center', marginTop: playbarOffset }}>Loading...</div>;
   if (!status.cronofy) return <Login status={status} />;
@@ -69,13 +63,10 @@ export function App() {
           maxHeight: containerHeight,
           overflowY: 'auto',
           position: 'relative',
-          // transform: rotation === Rotation.Portrait ? undefined : 'rotate(90deg)',
-          // WebkitTransform: rotation === Rotation.Portrait ? undefined : 'rotate(90deg)',
         }}
         ref={containerRef}
       >
         <KindleButtons />
-        {/* <DebugTime now={now} setNow={setNow} /> */}
 
         <Days events={events} now={now} error={eventError !== undefined} />
 
@@ -88,14 +79,14 @@ export function App() {
                 right: '0.5rem',
                 backgroundColor: 'white',
                 borderRadius: '50%',
-                padding: '0.25rem',
+                padding: '0.4rem 0.5rem 0.15rem',
                 zIndex: 1,
               }}
               onClick={() => {
                 if (containerRef.current) containerRef.current.scrollTop = 0;
               }}
             >
-              <ChevronUp />
+              <ChevronUp width={28} height={28} />
             </button>
 
             <Scrollbar

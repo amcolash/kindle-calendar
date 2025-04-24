@@ -23,10 +23,9 @@ export function Scrollbar({ contentHeight, containerHeight, scrollTop }: Scrollb
       style={{
         position: 'fixed',
         top: 0,
-        right: 0,
-        width: 2,
+        right: 10,
+        width: 6,
         height: containerHeight,
-        background: '#eee',
       }}
     >
       <div
@@ -35,7 +34,8 @@ export function Scrollbar({ contentHeight, containerHeight, scrollTop }: Scrollb
           top: scrollbarTop,
           height: scrollbarHeight,
           width: '100%',
-          background: '#999',
+          backgroundColor: '#666',
+          borderRadius: 3,
         }}
       />
     </div>

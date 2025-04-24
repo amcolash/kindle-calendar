@@ -1,4 +1,4 @@
-import { Moment } from 'moment';
+import moment, { Moment } from 'moment';
 import { forwardRef } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
@@ -21,7 +21,7 @@ interface StatusContainerProps {
 }
 
 export const StatusContainer = forwardRef<HTMLDivElement, StatusContainerProps>(
-  ({ playbackState, playbackError, updatePlaybackState, events, now, weather, aqi }, ref) => {
+  ({ playbackState, playbackError, updatePlaybackState, events, now = moment(), weather, aqi }, ref) => {
     const { rotation } = useRotationContext();
     const playState: 'playing' | 'paused' | 'idle' = playbackState?.state || 'idle';
 

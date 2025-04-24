@@ -1,7 +1,7 @@
 import moment from 'moment';
 
-import { KindleAPI } from '../components/Kindle';
 import { DEBUG, KINDLE } from '../util/util';
+import { KindleAPI } from './kindle';
 
 let initialDate: string;
 export function setupRefresh() {

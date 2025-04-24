@@ -55,7 +55,7 @@ export const KindleAPI = {
     /**
      * (Usage unclear. Maybe to exit the current WAF?)
      */
-    back: () => window.kindleAPI.appmgr.back(),
+    back: () => window.kindleAPI?.appmgr?.back(),
   },
   chrome: {
     /**
@@ -75,7 +75,7 @@ export const KindleAPI = {
      * @param {String} centerText
      * @returns
      */
-    setTitleBar: (leftText, centerText) => window.kindleAPI.chrome.setTitleBar(leftText || '', centerText || ''),
+    setTitleBar: (leftText, centerText) => window.kindleAPI?.chrome?.setTitleBar(leftText || '', centerText || ''),
   },
   device: {
     /**
