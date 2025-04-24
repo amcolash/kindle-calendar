@@ -1,10 +1,12 @@
 // import { DateTime } from 'luxon';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
 import { useClearScreen } from '../hooks/useClearScreen';
 import { useData } from '../hooks/useData';
 import { useRerender } from '../hooks/useRerender';
+import { useScrollPosition } from '../hooks/useScrollPosition';
+import { ReactComponent as ChevronUp } from '../icons/chevron-up.svg';
 import { SpotifyStatus } from '../types';
 import { AQI } from '../types/aqi';
 import { CronofyEvent } from '../types/events';
@@ -14,11 +16,17 @@ import { Days } from './Days';
 // import { DebugTime } from './DebugTime';
 import { KindleButtons } from './KindleButtons';
 import { Login, Status } from './Login';
+import { Scrollbar } from './Scrollbar';
 import { StatusContainer } from './StatusContainer';
 
 export function App() {
   const { clearScreenEl } = useClearScreen(); // Clear screen every 15 minutes
   const { rotation } = useRotationContext();
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scroll = useScrollPosition(containerRef.current);
+
+  const statusRef = useRef<HTMLDivElement | null>(null);
 
   const { data: status, loading: loadingStatus } = useData<Status>(`${SERVER}/status`, 5 * 60 * 1000);
   const { data: events, error: eventError } = useData<CronofyEvent[]>(`${SERVER}/events`, 5 * 60 * 1000);
@@ -46,7 +54,8 @@ export function App() {
   }, [playState]);
 
   let containerHeight;
-  const playbarOffset = playState === 'idle' ? 212 : 362;
+  // const playbarOffset = playState === 'idle' ? 212 : 362;
+  const playbarOffset = statusRef.current?.clientHeight || 0;
   if (rotation === Rotation.Portrait) containerHeight = HEIGHT - playbarOffset;
 
   if (loadingStatus || !status) return <div style={{ textAlign: 'center', marginTop: playbarOffset }}>Loading...</div>;
@@ -59,17 +68,47 @@ export function App() {
           padding: '1rem',
           maxHeight: containerHeight,
           overflowY: 'auto',
+          position: 'relative',
           // transform: rotation === Rotation.Portrait ? undefined : 'rotate(90deg)',
           // WebkitTransform: rotation === Rotation.Portrait ? undefined : 'rotate(90deg)',
         }}
+        ref={containerRef}
       >
         <KindleButtons />
         {/* <DebugTime now={now} setNow={setNow} /> */}
 
         <Days events={events} now={now} error={eventError !== undefined} />
+
+        {scroll > 0 && (
+          <>
+            <button
+              style={{
+                position: 'fixed',
+                bottom: playbarOffset + 14,
+                right: '0.5rem',
+                backgroundColor: 'white',
+                borderRadius: '50%',
+                padding: '0.25rem',
+                zIndex: 1,
+              }}
+              onClick={() => {
+                if (containerRef.current) containerRef.current.scrollTop = 0;
+              }}
+            >
+              <ChevronUp />
+            </button>
+
+            <Scrollbar
+              contentHeight={(containerRef.current?.scrollHeight || 1) - 28 * 2} // 2rem padding
+              containerHeight={containerHeight || 1}
+              scrollTop={scroll}
+            />
+          </>
+        )}
       </div>
 
       {clearScreenEl}
+
       <StatusContainer
         playbackState={playbackState}
         playbackError={playbackError}
@@ -78,6 +117,7 @@ export function App() {
         now={now}
         weather={weather}
         aqi={aqi}
+        ref={statusRef}
       />
     </>
   );
