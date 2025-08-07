@@ -24,7 +24,13 @@
 
     <script>
       window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
-        alert(errorMsg);
+        document.querySelector('.error-message').innerHTML =
+          'Error: ' + errorMsg + '<br>URL: ' + url + '<br>Line: ' + lineNumber;
+
+        setTimeout(function () {
+          window.location.reload();
+        }, 5000);
+
         return false;
       };
 
@@ -38,6 +44,7 @@
 
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div class="error-message"></div>
     <div id="root"></div>
     <!--
       This HTML file is a template.

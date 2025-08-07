@@ -105,7 +105,7 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
         <img
           src={playbackState.attributes.entity_picture}
           style={rotation === Rotation.Portrait ? portraitCoverStyle : landscapeCoverStyle}
-          alt="album cover"
+          alt=""
         />
         <button style={iconStyle}>
           <img
