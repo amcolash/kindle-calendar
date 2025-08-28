@@ -1,9 +1,11 @@
 /// <reference types="react-scripts" />
 
 // Auto-generated home assistant typedef for media player from https://app.quicktype.io/
+export type PlaybackState = 'idle' | 'playing' | 'paused' | 'unavailable';
+
 export interface SpotifyStatus {
   entity_id: string;
-  state: 'idle' | 'playing' | 'paused';
+  state: PlaybackState;
   attributes: Attributes;
   last_changed: Date;
   last_reported: Date;

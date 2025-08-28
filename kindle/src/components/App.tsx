@@ -6,7 +6,7 @@ import { useData } from '../hooks/useData';
 import { useRerender } from '../hooks/useRerender';
 import { useScrollPosition } from '../hooks/useScrollPosition';
 import { ReactComponent as ChevronUp } from '../icons/chevron-up.svg';
-import { SpotifyStatus } from '../types';
+import { PlaybackState, SpotifyStatus } from '../types';
 import { AQI } from '../types/aqi';
 import { CronofyEvent } from '../types/events';
 import { Weather } from '../types/weather';
@@ -42,7 +42,7 @@ export function App() {
 
   const now = moment();
 
-  const playState: 'playing' | 'paused' | 'idle' = playbackState?.state || 'idle';
+  const playState: PlaybackState = playbackState?.state || 'idle';
 
   useEffect(() => {
     if (playState === 'playing') setPlaybackUpdate(10 * 1000);

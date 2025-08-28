@@ -65,7 +65,7 @@ export function NowPlaying({ playbackState, error, updatePlaybackState }: NowPla
       </Container>
     );
 
-  if (!playbackState || playState === 'idle') {
+  if (!playbackState || playState === 'idle' || playState === 'unavailable') {
     if (rotation === Rotation.Portrait)
       return (
         <Container>

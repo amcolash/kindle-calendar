@@ -2,7 +2,7 @@ import moment, { Moment } from 'moment';
 import { forwardRef } from 'react';
 
 import { Rotation, useRotationContext } from '../contexts/rotationContext';
-import { SpotifyStatus } from '../types';
+import { PlaybackState, SpotifyStatus } from '../types';
 import { AQI } from '../types/aqi';
 import { CronofyEvent } from '../types/events';
 import { Weather as WeatherType } from '../types/weather';
@@ -23,7 +23,7 @@ interface StatusContainerProps {
 export const StatusContainer = forwardRef<HTMLDivElement, StatusContainerProps>(
   ({ playbackState, playbackError, updatePlaybackState, events, now = moment(), weather, aqi }, ref) => {
     const { rotation } = useRotationContext();
-    const playState: 'playing' | 'paused' | 'idle' = playbackState?.state || 'idle';
+    const playState: PlaybackState = playbackState?.state || 'idle';
 
     return (
       <div
