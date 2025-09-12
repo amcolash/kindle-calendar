@@ -31,6 +31,9 @@
     "postbuild": "node scripts/bundle-kual-app.js",
     "serve": "serve -s build -l 4000",
     "deploy": "echo { \\\"date\\\": \\\"$(date)\\\" } > public/date.json && npm run build && npm run sync",
+    "deployRun": "npm run deploy && npm run stopRemote && sleep 1 && npm run startRemote",
+    "startRemote": "ssh kindle -t 'lipc-set-prop com.lab126.appmgrd start app://com.amcolash.kindle_dashboard'",
+    "stopRemote": "ssh kindle -t 'lipc-set-prop com.lab126.appmgrd stop app://com.amcolash.kindle_dashboard'",
     "sync": "rsync -azvv --no-perms --no-owner --no-group --delete build/com.amcolash.kindle_dashboard kindle:/mnt/us/extensions",
     "watch": "nodemon --exec 'npm run deploy' --watch src --watch scripts -e tsx,ts,jsx,js,css,xml,sh,svg,png",
     "eject": "react-scripts eject"

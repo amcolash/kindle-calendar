@@ -14,6 +14,7 @@ import { HEIGHT, SERVER } from '../util/util';
 import { Days } from './Days';
 // import { DebugTime } from './DebugTime';
 import { KindleButtons } from './KindleButtons';
+import { Loading } from './Loading';
 import { Login, Status } from './Login';
 import { Scrollbar } from './Scrollbar';
 import { StatusContainer } from './StatusContainer';
@@ -52,7 +53,7 @@ export function App() {
   const playbarOffset = statusRef.current?.clientHeight || 0;
   let containerHeight = HEIGHT - playbarOffset;
 
-  if (loadingStatus || !status) return <div style={{ textAlign: 'center', marginTop: playbarOffset }}>Loading...</div>;
+  if (loadingStatus || !status) return <Loading />;
   if (!status.cronofy) return <Login status={status} />;
 
   return (

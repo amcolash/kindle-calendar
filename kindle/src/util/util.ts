@@ -3,7 +3,7 @@ import { CronofyEvent } from '../types/events';
 export const DEBUG = false;
 export const LOCAL_SERVER = false;
 
-export const https = true;
+export const https = false;
 export const PORT = https ? 8501 : 8502;
 export const LOCAL_IP = '192.168.1.143';
 export const SERVER_IP = '192.168.1.101';
