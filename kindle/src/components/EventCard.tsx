@@ -40,7 +40,11 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
   const endTime = end?.format('h:mm A') || '';
   const endTimeEt = end?.clone().tz('America/New_York').format('h:mm A') || '';
 
-  const leaveBy = event.summary.toLowerCase().includes('chiro') ? start?.clone().subtract(20, 'minutes') : undefined;
+  let leaveBy;
+  if (event.summary.toLowerCase().includes('chiro')) leaveBy = start?.clone().subtract(35, 'minutes');
+  if (event.summary.toLowerCase().includes('massage')) leaveBy = start?.clone().subtract(15, 'minutes');
+  if (event.summary.toLowerCase().includes('dentist')) leaveBy = start?.clone().subtract(20, 'minutes');
+
   const leaveByLabel = leaveBy ? `[Leave by ${leaveBy?.format('h:mm A')}]` : '';
 
   const timeLabel = `${startLabel}${startTime}${noLabel}${endLabel}${endTime}`;

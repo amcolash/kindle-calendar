@@ -212,15 +212,16 @@ const iconStyle: CSSProperties = {
 export function getEventIcon(event: CronofyEvent): JSX.Element | null {
   const summary = (event.summary || '').toLowerCase();
 
-  if (summary.includes('chiro') || summary.includes('massage')) return <Bike style={iconStyle} />;
+  if (summary.includes('chiro') || summary.includes('massage') || summary.includes('dentist'))
+    return <Bike style={iconStyle} />;
   if (summary.includes('pt')) return <Walk style={iconStyle} />;
   if (summary.includes('mha') || summary.includes('project time')) return <Tada style={iconStyle} />;
 
   if (summary.includes('gathertown')) return <Gathertown style={iconStyle} />;
-  if (summary.includes('standup')) return <Slack style={iconStyle} />;
 
   if (event.meeting_url?.toLowerCase().includes('zoom.us')) return <Zoom style={iconStyle} />;
   if (event.meeting_url?.toLowerCase().includes('meet.google.com')) return <Meet style={iconStyle} />;
+  if (event.meeting_url?.toLowerCase().includes('slack.com')) return <Slack style={iconStyle} />;
 
   return null;
 }
