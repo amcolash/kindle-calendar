@@ -12,6 +12,9 @@ interface EventCardProps {
   now?: Moment;
 }
 
+// export const secondTimezone = 'America/New_York';
+export const secondTimezone = undefined;
+
 export function EventCard({ event, currentDay, now = moment() }: EventCardProps) {
   const [showModal, setShowModal] = useState(false);
 
@@ -34,21 +37,28 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
   // Build label for start/end when it is not a full day event
   const startLabel = start && !end ? '[All Day] Begins ' : '';
   const startTime = start?.format('h:mm A') || '';
-  const startTimeEt = start?.clone().tz('America/New_York').format('h:mm A') || '';
   const noLabel = start && end ? ' - ' : '';
   const endLabel = !start && end ? '[All Day] Until ' : '';
   const endTime = end?.format('h:mm A') || '';
-  const endTimeEt = end?.clone().tz('America/New_York').format('h:mm A') || '';
 
   let leaveBy;
-  if (event.summary.toLowerCase().includes('chiro')) leaveBy = start?.clone().subtract(35, 'minutes');
-  if (event.summary.toLowerCase().includes('massage')) leaveBy = start?.clone().subtract(15, 'minutes');
-  if (event.summary.toLowerCase().includes('dentist')) leaveBy = start?.clone().subtract(20, 'minutes');
+  if (event.summary.toLowerCase().includes('chiro')) leaveBy = start?.clone().subtract(20, 'minutes');
+  if (event.summary.toLowerCase().includes('massage')) leaveBy = start?.clone().subtract(10, 'minutes');
+  if (event.summary.toLowerCase().includes('dentist')) leaveBy = start?.clone().subtract(15, 'minutes');
 
-  const leaveByLabel = leaveBy ? `[Leave by ${leaveBy?.format('h:mm A')}]` : '';
+  const leaveByLabel = leaveBy ? `[Leave by ${leaveBy?.format('h:mm A')}]` : undefined;
 
   const timeLabel = `${startLabel}${startTime}${noLabel}${endLabel}${endTime}`;
-  const easternTimeLabel = `${startLabel}${startTimeEt}${noLabel}${endLabel}${endTimeEt} (ET)`;
+
+  let timeLabelTwo;
+  if (secondTimezone) {
+    const startTimeTwo = start?.clone().tz(secondTimezone).format('h:mm A') || '';
+    const endTimeTwo = end?.clone().tz(secondTimezone).format('h:mm A') || '';
+
+    timeLabelTwo = `${startLabel}${startTimeTwo}${noLabel}${endLabel}${endTimeTwo} (${moment()
+      .tz(secondTimezone)
+      .format('z')})`;
+  }
 
   const currentlyHappening =
     (end?.diff(start, 'hours') || 0) < 23 && now?.isBetween(leaveBy || start, end, 'minute', '[]');
@@ -76,12 +86,11 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
 
         <div style={{ position: 'relative' }}>
           <div style={{ marginTop: '0.25rem' }}>{fullDay ? '[All Day]' : timeLabel}</div>
-          <div style={{ position: 'absolute', top: '0.25rem', right: 0, fontSize: 20 }}>
-            {fullDay ? '[All Day]' : easternTimeLabel}
-          </div>
-          {event.summary.toLowerCase().includes('chiro') && (
-            <div style={{ marginTop: '0.25rem', fontWeight: 'bold' }}>{leaveByLabel}</div>
+          {timeLabelTwo && !fullDay && (
+            <div style={{ position: 'absolute', top: '0.25rem', right: 0, fontSize: 20 }}>{timeLabelTwo}</div>
           )}
+
+          {leaveByLabel && <div style={{ marginTop: '0.25rem', fontWeight: 'bold' }}>{leaveByLabel}</div>}
         </div>
       </div>
 
@@ -131,7 +140,11 @@ export function EventCard({ event, currentDay, now = moment() }: EventCardProps)
             </Twemoji>
 
             <div style={{ marginTop: '0.25rem', fontSize: '0.85rem' }}>{fullDay ? '[All Day]' : timeLabel}</div>
-            <hr />
+            {event.location && (
+              <div style={{ marginTop: '0.25rem', fontSize: '0.85rem' }}>{event.location.description}</div>
+            )}
+
+            {(event.description || event.attendees?.length > 0) && <hr />}
 
             {event.description && (
               <>

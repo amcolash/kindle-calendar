@@ -1,5 +1,6 @@
 import moment from 'moment';
 
+import { secondTimezone } from '../components/EventCard';
 import { DEBUG, KINDLE } from '../util/util';
 import { KindleAPI } from './kindle';
 
@@ -19,8 +20,14 @@ export function setupRefresh() {
           });
 
         const ct = moment().tz('America/Chicago').format('h:mm A') + ' (CT)';
-        const et = moment().tz('America/New_York').format('h:mm A') + ' (ET)';
-        KindleAPI.chrome.setTitleBar(ct + '     |     ' + et, '');
+
+        let tz2;
+        if (secondTimezone) {
+          tz2 = moment().tz(secondTimezone).format('h:mm A') + ` (${moment().tz(secondTimezone).format('z')})`;
+        }
+
+        const title = ct + (tz2 ? `     |     ${tz2}` : '');
+        KindleAPI.chrome.setTitleBar(title, '');
       },
       (DEBUG ? 2 : 60) * 1000
     );

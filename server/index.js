@@ -125,7 +125,7 @@ app.get('/status', (req, res) => {
 
 app.get('/events', async (req, res) => {
   const today = DateTime.now().startOf('day');
-  const future = today.plus({ days: 2 }).endOf('day'); // 2 days in the future
+  const future = today.plus({ days: 3 }).endOf('day'); // 2 days in the future
 
   cronofyClient
     .readEvents({ from: today.toISODate(), to: future.toISODate(), tzid: TIMEZONE })
