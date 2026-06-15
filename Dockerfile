@@ -1,5 +1,5 @@
-# Use node 20
-FROM node:20-alpine
+# Use node lts
+FROM node:lts-alpine
 
 # Create app directory
 WORKDIR /usr/src/app
